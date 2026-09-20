@@ -68,6 +68,7 @@ router.post('/coupon',authenticate,validate(z.object({holdId:z.string(),code:z.s
 const checkoutSchema = z.object({ holdId: z.string(), couponCode:z.string().trim().min(2).optional(), customer: z.object({ name: z.string().min(2), email: z.string().email(), mobile: z.string().min(7), company: z.string().optional(), gstin: z.string().optional() }) });
 router.post('/checkout', authenticate, validate(checkoutSchema), async (req, res, next) => {
   try {
+    if(config.paymentProvider==='disabled')return res.status(503).json({message:'Online payments are coming soon. Please use Request a purchase call and the TWS team will help you complete the booking.'});
     const hold = await Hold.findOne({ _id: req.validated.holdId, owner: req.user._id, status: 'active', expiresAt: { $gt: new Date() } });
     if (!hold) return res.status(410).json({ message: 'Your hold has expired. Please select the workspace again.' });
     const existing = await Booking.findOne({ hold: hold._id });

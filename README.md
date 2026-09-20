@@ -26,7 +26,7 @@ The seeded admin email defaults to `admin@tws.com`; credentials are controlled b
 
 - Set `NODE_ENV=production`, a strong `JWT_SECRET`, production `MONGODB_URI`, and the deployed `CLIENT_URL`.
 - Configure SMTP variables for verification, password-reset and booking mail delivery.
-- Set `PAYMENT_PROVIDER=cashfree` and add the Cashfree App ID and secret. The mock adapter refuses to confirm payments in production.
+- Set `PAYMENT_PROVIDER=disabled` for a safe enquiry-only launch, or use `PAYMENT_PROVIDER=cashfree` with the Cashfree App ID and secret. The mock adapter refuses to confirm payments in production.
 - Serve the built client from a CDN/static host and the API behind TLS.
 - Run MongoDB as a replica set for operational resilience and backups.
 - Change the seeded admin credentials before deployment and restrict access to the admin portal.
