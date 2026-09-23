@@ -19,8 +19,8 @@ The React frontend runs on Vercel, the Express/Socket.IO backend runs on Render,
 ## 2. Create the Vercel frontend
 
 1. At https://vercel.com/new, import **twstheworksuites-byte/The-Work-Suites**.
-2. Set **Root Directory** to `client`, **Framework Preset** to `Vite`, and Node.js to `24.x`.
-3. The committed `client/vercel.json` sets install command `npm ci`, build command `npm run build`, output directory `dist`, and the React Router fallback.
+2. Leave **Root Directory** at the repository root (blank / `.`), set **Framework Preset** to `Vite`, and Node.js to `24.x`.
+3. The root `vercel.json` installs the frontend with `npm ci --prefix client`, builds it with `npm run build --prefix client`, publishes `client/dist`, and sets the React Router fallback. Projects already configured with **Root Directory** `client` also work: `client/vercel.json` uses `npm ci`, `npm run build`, and `dist` relative to that directory.
 4. Deploy and copy the production address, for example `https://YOUR-PROJECT.vercel.app`. The frontend can build before Render exists, but API-backed features will work only after step 4 below.
 
 ## 3. Create the Render backend
@@ -102,6 +102,8 @@ Admin workspace images are written to `server/uploads`. Render's ephemeral files
 6. Test verification/password-reset email after SMTP is configured; test Cashfree sandbox checkout before accepting live payments.
 
 For CORS errors, compare the browser's exact origin with Render's `CLIENT_URL`. For MongoDB startup timeouts, check Atlas credentials and network access. For a blank inventory, confirm the seed and Render use the same database name.
+
+If Vercel reports `vite: command not found`, confirm the deployment uses the latest `main` commit containing the root `vercel.json`. A root-level `npm install` alone only installs the development launcher, not the frontend dependencies. The configured install command must install packages in `client`.
 
 ## Hosting documentation
 
