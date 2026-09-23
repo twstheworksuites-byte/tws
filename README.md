@@ -24,6 +24,8 @@ The seeded admin email defaults to `admin@tws.com`; credentials are controlled b
 
 ## Production configuration
 
+For the GitHub → Vercel frontend + Render backend setup, follow [DEPLOYMENT.md](DEPLOYMENT.md). The repository includes a Render Blueprint and the Vercel build/routing configuration.
+
 - Set `NODE_ENV=production`, a strong `JWT_SECRET`, production `MONGODB_URI`, and the deployed `CLIENT_URL`.
 - Configure SMTP variables for verification, password-reset and booking mail delivery.
 - Set `PAYMENT_PROVIDER=disabled` for a safe enquiry-only launch, or use `PAYMENT_PROVIDER=cashfree` with the Cashfree App ID and secret. The mock adapter refuses to confirm payments in production.
