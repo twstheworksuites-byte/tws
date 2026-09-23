@@ -1,8 +1,14 @@
 import { Router } from 'express';
 import { Booking, PaymentEvent } from '../models.js';
+import { config } from '../config.js';
 import { finalizePaidBooking, notifyBooking, verifyCashfreeWebhook, verifyPayment } from '../services.js';
 
 const router = Router();
+
+router.get('/config', (req, res) => {
+  const enabled = config.paymentProvider === 'cashfree' || (config.paymentProvider === 'mock' && config.env !== 'production');
+  res.set('Cache-Control', 'no-store').json({ provider: enabled ? config.paymentProvider : 'disabled', enabled, mode: process.env.CASHFREE_ENV === 'production' ? 'production' : 'sandbox' });
+});
 
 router.post('/cashfree/webhook', async (req, res, next) => {
   try {
@@ -11,11 +17,20 @@ router.post('/cashfree/webhook', async (req, res, next) => {
     if (!verifyCashfreeWebhook(rawBody, timestamp, signature)) return res.status(401).json({ message: 'Invalid webhook signature.' });
     const payload = JSON.parse(rawBody), eventType = payload.type || payload.event_type;
     const orderId = payload.data?.order?.order_id, paymentId = payload.data?.payment?.cf_payment_id;
-    const eventId = `${eventType}:${paymentId || orderId}:${timestamp}`;
-    try { await PaymentEvent.create({ eventId, eventType, orderId, verified: true }); } catch (error) { if (error.code === 11000) return res.json({ received: true, duplicate: true }); throw error; }
+    const refund = payload.data?.refund;
+    const eventId = `${eventType}:${orderId}:${refund ? `${refund.cf_refund_id || refund.refund_id}:${refund.refund_status}` : paymentId || 'order'}`;
+    try { await PaymentEvent.create({ eventId, eventType, orderId, verified: true }); } catch (error) {
+      if (error.code !== 11000) throw error;
+      const previous = await PaymentEvent.findOne({ eventId });
+      if (previous?.processedAt) return res.json({ received: true, duplicate: true });
+      // An earlier delivery failed. Retry processing rather than discarding it.
+    }
     if (eventType === 'PAYMENT_SUCCESS_WEBHOOK' && orderId) {
+      if (payload.data?.payment?.payment_status !== 'SUCCESS') return res.status(400).json({ message: 'Invalid payment success event.' });
       const booking = await Booking.findOne({ 'payment.orderId': orderId });
-      if (booking && booking.status === 'pending_payment' && await verifyPayment({ orderId, paymentId: String(paymentId || 'webhook'), signature: 'cashfree-server-check' })) {
+      if (!booking) return res.status(503).json({ message: 'Payment order is not recorded yet. Retry delivery.' });
+      if (booking.status === 'pending_payment') {
+        if (!await verifyPayment({ orderId, amount: booking.total })) return res.status(503).json({ message: 'Payment verification is pending. Retry delivery.' });
         await finalizePaidBooking(booking, String(paymentId || 'webhook'));
         req.app.get('io').emit('availability:update', { workspaceId: booking.workspace, seatId: booking.seat, reason: 'payment_webhook_confirmed' });
         req.app.get('io').emit('operations:update', { resource: 'booking', action: 'webhook_confirmed', id: booking._id });

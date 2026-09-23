@@ -72,9 +72,14 @@ router.post('/checkout', authenticate, validate(checkoutSchema), async (req, res
     const hold = await Hold.findOne({ _id: req.validated.holdId, owner: req.user._id, status: 'active', expiresAt: { $gt: new Date() } });
     if (!hold) return res.status(410).json({ message: 'Your hold has expired. Please select the workspace again.' });
     const existing = await Booking.findOne({ hold: hold._id });
-    if (existing) { const paymentOrder = await createPaymentOrder(existing); existing.payment.orderId = paymentOrder.orderId; existing.payment.status = 'pending'; await existing.save(); return res.json({ booking: existing, paymentOrder }); }
+    if (existing) {
+      if (existing.status !== 'pending_payment' || existing.payment.provider !== config.paymentProvider) return res.status(409).json({ message: 'This booking cannot start another payment. Check My Bookings.' });
+      const paymentOrder = await createPaymentOrder(existing);
+      return res.json({ booking: existing, paymentOrder });
+    }
     const coupon=req.validated.couponCode?await activeCoupon(req.validated.couponCode):null,quote=coupon?couponQuote(hold.quote,coupon):hold.quote;
-    const booking = await Booking.create({ bookingId: bookingReference(), user: req.user._id, workspace: hold.workspace, seat: hold.seat,seats:hold.seats, hold: hold._id, startAt: hold.startAt, endAt: hold.endAt, durationType: hold.durationType, amount: quote.base, tax: quote.tax, discount: quote.discount, total: quote.total, couponCode:coupon?.code, customer: req.validated.customer, payment: { provider: process.env.PAYMENT_PROVIDER || 'mock', status: 'pending' } });
+    const reference = bookingReference();
+    const booking = await Booking.create({ bookingId: reference, user: req.user._id, workspace: hold.workspace, seat: hold.seat,seats:hold.seats, hold: hold._id, startAt: hold.startAt, endAt: hold.endAt, durationType: hold.durationType, amount: quote.base, tax: quote.tax, discount: quote.discount, total: quote.total, couponCode:coupon?.code, customer: req.validated.customer, payment: { provider: config.paymentProvider, orderId: config.paymentProvider === 'cashfree' ? reference.replaceAll('-', '_') : undefined, status: 'pending' } });
     const paymentOrder = await createPaymentOrder(booking); booking.payment.orderId = paymentOrder.orderId; await booking.save();
     await User.findByIdAndUpdate(req.user._id, { $set: req.validated.customer });
     req.app.get('io').emit('operations:update', { resource: 'booking', action: 'created', id: booking._id });
@@ -84,11 +89,14 @@ router.post('/checkout', authenticate, validate(checkoutSchema), async (req, res
 
 router.post('/:id/confirm-payment', authenticate, validate(z.object({ orderId: z.string(), paymentId: z.string(), signature: z.string() })), async (req, res, next) => {
   try {
-    const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id, status: 'pending_payment' });
-    if (!booking) return res.status(404).json({ message: 'Pending booking not found.' });
+    const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id });
+    if (!booking) return res.status(404).json({ message: 'Booking not found.' });
+    if (booking.payment.orderId !== req.validated.orderId) return res.status(400).json({ message: 'Payment order does not match this booking.' });
+    if (['confirmed', 'checked_in', 'completed'].includes(booking.status)) return res.json({ booking, checkInToken: bookingCheckInToken(booking) });
+    if (booking.status !== 'pending_payment') return res.status(409).json({ message: 'This booking cannot be confirmed.' });
     const hold = await Hold.findOne({ _id: booking.hold, status: 'active', expiresAt: { $gt: new Date() } });
     if (!hold) return res.status(410).json({ message: 'The hold expired before payment could be confirmed.' });
-    if (booking.payment.orderId !== req.validated.orderId || !await verifyPayment(req.validated)) { booking.payment.status = 'failed'; await booking.save(); return res.status(400).json({ message: 'Payment verification failed. Your booking was not confirmed.' }); }
+    if (!await verifyPayment({ ...req.validated, amount: booking.total })) return res.status(409).json({ message: 'Payment is not confirmed yet. Check the payment status before trying again.' });
     const { checkInToken } = await finalizePaidBooking(booking, req.validated.paymentId);
     req.app.get('io').emit('availability:update', { workspaceId: booking.workspace, seatId: booking.seat, reason: 'booking_confirmed' });
     req.app.get('io').emit('operations:update', { resource: 'booking', action: 'confirmed', id: booking._id });
@@ -184,7 +192,20 @@ router.get('/invoices/:id/pdf', authenticate, async (req, res, next) => {
     doc.end();
   } catch (e) { next(e); }
 });
-router.post('/:id/reconcile',authenticate,async(req,res,next)=>{try{const booking=await Booking.findOne({_id:req.params.id,user:req.user._id});if(!booking)return res.status(404).json({message:'Booking not found.'});if(booking.status!=='pending_payment')return res.json({booking,checkInToken:['confirmed','checked_in'].includes(booking.status)?bookingCheckInToken(booking):undefined});if(!await verifyPayment({orderId:booking.payment.orderId,paymentId:'reconciled',signature:process.env.PAYMENT_PROVIDER==='mock'?'development-approved':'cashfree-server-check'}))return res.status(409).json({message:'Payment is not marked paid yet.'});const result=await finalizePaidBooking(booking,'reconciled');req.app.get('io').emit('operations:update',{resource:'booking',action:'reconciled',id:booking._id});notifyBooking(booking,'confirmed').catch(()=>{});res.json(result);}catch(e){next(e);}});
+router.post('/:id/reconcile', authenticate, async (req, res, next) => {
+  try {
+    const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id });
+    if (!booking) return res.status(404).json({ message: 'Booking not found.' });
+    if (['confirmed', 'checked_in', 'completed'].includes(booking.status)) return res.json({ booking, checkInToken: bookingCheckInToken(booking) });
+    if (booking.status !== 'pending_payment') return res.status(409).json({ message: 'This booking cannot be confirmed. Contact support if you were charged.' });
+    if (!booking.payment.orderId || !await verifyPayment({ orderId: booking.payment.orderId, amount: booking.total, signature: config.paymentProvider === 'mock' ? 'development-approved' : undefined })) return res.status(409).json({ message: 'Payment is not confirmed yet. If you were charged, check again shortly; do not pay again.' });
+    const result = await finalizePaidBooking(booking, 'server-verified');
+    req.app.get('io').emit('availability:update', { workspaceId: booking.workspace, reason: 'payment_confirmed' });
+    req.app.get('io').emit('operations:update', { resource: 'booking', action: 'reconciled', id: booking._id });
+    notifyBooking(booking, 'confirmed').catch(() => {});
+    res.json(result);
+  } catch (error) { next(error); }
+});
 router.patch('/:id/cancel', authenticate, async (req, res, next) => { try { const cancellationCutoff = new Date(Date.now() + 48 * 3600000); const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id, status: 'confirmed', startAt: { $gte: cancellationCutoff }, 'cancellation.status':{$nin:['requested','approved']} }); if (!booking) return res.status(409).json({ message: 'Cancellation requests close 48 hours before the booking starts.' }); const reason=String(req.body.reason||'').trim();if(reason.length<5)return res.status(422).json({message:'Please provide a clear cancellation reason.'});booking.cancellation={reason,requestedAt:new Date(),requestedBy:req.user._id,status:'requested',refundStatus:booking.payment.status==='paid'?'pending':'not_required'};await booking.save();await Notification.create({title:'Cancellation request',message:`${booking.customer?.name||'A customer'} requested cancellation for ${booking.bookingId}.`,audience:'admins',kind:'cancellation',booking:booking._id,status:'sent',sentAt:new Date()});await createCustomerNotification(booking.user,{title:'Cancellation request received',message:`Your request to cancel ${booking.bookingId} was sent to the administrator for review.`,kind:'cancellation',booking:booking._id});req.app.get('io').emit('operations:update',{resource:'cancellation',action:'requested',id:booking._id});await audit(req,'booking.cancellation_requested','Booking',booking._id,{reason});res.json({booking});}catch(e){next(e);} });
 
 router.get('/', authenticate, authorize('super_admin'), async (req, res, next) => { try { const query = {}; if(req.query.status) query.status=req.query.status; const items = await Booking.find(query).populate('workspace seat seats user').sort({ startAt: -1 }).limit(200).lean(); res.json({ items }); } catch(e){ next(e); } });

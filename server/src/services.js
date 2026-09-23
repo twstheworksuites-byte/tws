@@ -73,34 +73,51 @@ export function bookingReference() {
 }
 
 export async function createPaymentOrder(booking) {
+  if (!['cashfree', 'mock'].includes(config.paymentProvider)) throw Object.assign(new Error('Online payments are not enabled.'), { status: 503 });
   if (config.paymentProvider === 'mock' && config.env === 'production') throw Object.assign(new Error('A production payment provider must be configured.'), { status: 503 });
   if (config.paymentProvider === 'cashfree') {
     if (!process.env.CASHFREE_APP_ID || !process.env.CASHFREE_SECRET_KEY) throw Object.assign(new Error('Cashfree credentials are not configured.'), { status: 503 });
     const baseUrl = process.env.CASHFREE_ENV === 'production' ? 'https://api.cashfree.com/pg' : 'https://sandbox.cashfree.com/pg';
     const orderId = booking.bookingId.replaceAll('-', '_');
+    const headers = { 'Content-Type': 'application/json', 'x-api-version': process.env.CASHFREE_API_VERSION || '2025-01-01', 'x-client-id': process.env.CASHFREE_APP_ID, 'x-client-secret': process.env.CASHFREE_SECRET_KEY };
+    // Reuse an existing order after a closed checkout or a lost create response.
+    const previous = await fetch(`${baseUrl}/orders/${encodeURIComponent(orderId)}`, { headers, signal: AbortSignal.timeout(15_000) });
+    if (previous.ok) {
+      const data = await previous.json();
+      if (data.order_id !== orderId || data.order_currency !== 'INR' || Math.round(Number(data.order_amount) * 100) !== Math.round(booking.total * 100)) throw Object.assign(new Error('Payment order does not match this booking. Please contact support.'), { status: 409 });
+      return cashfreeSession(data, booking.total);
+    }
+    if (previous.status !== 404) throw Object.assign(new Error('Cashfree could not check the payment order. Please try again.'), { status: 502 });
+    const key = crypto.createHash('sha256').update(`cashfree:${orderId}`).digest('hex');
+    const idempotencyKey = `${key.slice(0,8)}-${key.slice(8,12)}-4${key.slice(13,16)}-a${key.slice(17,20)}-${key.slice(20,32)}`;
     const response = await fetch(`${baseUrl}/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-version': process.env.CASHFREE_API_VERSION || '2025-01-01', 'x-client-id': process.env.CASHFREE_APP_ID, 'x-client-secret': process.env.CASHFREE_SECRET_KEY, 'x-idempotency-key': crypto.randomUUID() },
-      body: JSON.stringify({ order_id: orderId, order_amount: booking.total, order_currency: 'INR', customer_details: { customer_id: String(booking.user), customer_name: booking.customer.name, customer_email: booking.customer.email, customer_phone: booking.customer.mobile }, order_meta: { return_url: `${config.clientUrl.split(',')[0]}/checkout?cashfree_order_id=${orderId}` }, order_note: `Workspace booking ${booking.bookingId}` }),
+      headers: { ...headers, 'x-idempotency-key': idempotencyKey },
+      body: JSON.stringify({ order_id: orderId, order_amount: booking.total, order_currency: 'INR', customer_details: { customer_id: String(booking.user), customer_name: booking.customer.name, customer_email: booking.customer.email, customer_phone: booking.customer.mobile.replace(/[\s()-]/g, '') }, order_meta: { return_url: `${config.clientUrl.split(',')[0].trim().replace(/\/$/, '')}/checkout?booking_id=${booking._id}` }, order_note: `Workspace booking ${booking.bookingId}` }),
       signal: AbortSignal.timeout(15_000)
     });
     const data = await response.json();
     if (!response.ok) throw Object.assign(new Error(data.message || 'Cashfree could not create the payment order.'), { status: 502 });
-    return { provider: 'cashfree', orderId: data.order_id, paymentSessionId: data.payment_session_id, amount: Math.round(booking.total * 100), currency: 'INR', mode: process.env.CASHFREE_ENV === 'production' ? 'production' : 'sandbox' };
+    return cashfreeSession(data, booking.total);
   }
   return { provider: config.paymentProvider, orderId: `order_${crypto.randomBytes(10).toString('hex')}`, amount: Math.round(booking.total * 100), currency: 'INR', development: config.paymentProvider === 'mock' };
 }
 
-export async function verifyPayment({ orderId, paymentId, signature }) {
+function cashfreeSession(data, total) {
+  if (!['ACTIVE', 'PAID'].includes(data.order_status)) throw Object.assign(new Error('This payment order has expired or is unavailable. Please select the workspace again.'), { status: 409 });
+  if (data.order_status === 'ACTIVE' && !data.payment_session_id) throw Object.assign(new Error('Cashfree did not return a checkout session.'), { status: 502 });
+  return { provider: 'cashfree', orderId: data.order_id, paymentSessionId: data.payment_session_id, paid: data.order_status === 'PAID', amount: Math.round(total * 100), currency: 'INR', mode: process.env.CASHFREE_ENV === 'production' ? 'production' : 'sandbox' };
+}
+
+export async function verifyPayment({ orderId, signature, amount }) {
   if (config.paymentProvider === 'mock') return config.env !== 'production' && signature === 'development-approved';
   if (config.paymentProvider === 'cashfree') {
     const baseUrl = process.env.CASHFREE_ENV === 'production' ? 'https://api.cashfree.com/pg' : 'https://sandbox.cashfree.com/pg';
     const response = await fetch(`${baseUrl}/orders/${encodeURIComponent(orderId)}`, { headers: { 'x-api-version': process.env.CASHFREE_API_VERSION || '2025-01-01', 'x-client-id': process.env.CASHFREE_APP_ID, 'x-client-secret': process.env.CASHFREE_SECRET_KEY }, signal: AbortSignal.timeout(15_000) });
     const data = await response.json();
-    return response.ok && data.order_status === 'PAID';
+    return response.ok && data.order_status === 'PAID' && data.order_id === orderId && data.order_currency === 'INR' && Number.isFinite(amount) && Math.round(Number(data.order_amount) * 100) === Math.round(amount * 100);
   }
-  const expected = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(`${orderId}|${paymentId}`).digest('hex');
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature || ''));
+  return false;
 }
 
 export function verifyCashfreeWebhook(rawBody, timestamp, signature) {
@@ -122,6 +139,31 @@ export async function refundPayment(booking, amount) {
 }
 
 export async function finalizePaidBooking(booking, paymentId = 'server-verified') {
+  if (booking.payment.provider === 'cashfree') {
+    // Atlas transactions make simultaneous browser/webhook confirmations atomic.
+    const result = await Booking.db.transaction(async session => {
+      const current = await Booking.findById(booking._id).session(session);
+      if (!current) throw Object.assign(new Error('Booking not found.'), { status: 404 });
+      if (['confirmed', 'checked_in', 'completed'].includes(current.status)) return { booking: current, checkInToken: bookingCheckInToken(current) };
+      if (current.status !== 'pending_payment') throw Object.assign(new Error('This booking cannot be confirmed. Contact support if you were charged.'), { status: 409 });
+      const hold = await Hold.findOne({ _id: current.hold, status: 'active', expiresAt: { $gt: new Date() } }).session(session);
+      if (!hold) throw Object.assign(new Error('The hold expired before payment could be finalized. Do not pay again; contact support for reconciliation or a refund.'), { status: 409 });
+      const expectedLocks = slotsBetween(current.startAt, current.endAt).length * Math.max(1, current.seats?.length || 0);
+      const lockCount = await ResourceLock.countDocuments({ hold: hold._id }).session(session);
+      if (lockCount !== expectedLocks) throw Object.assign(new Error('The reservation is no longer available. Do not pay again; contact support for a refund.'), { status: 409 });
+      const checkInToken = bookingCheckInToken(current), { hash, salt } = hashValue(checkInToken);
+      current.status = 'confirmed'; current.payment.status = 'paid'; current.payment.paymentId = paymentId; current.checkInTokenHash = `${salt}:${hash}`;
+      await current.save({ session });
+      if (current.couponCode) await Coupon.updateOne({ code: current.couponCode }, { $inc: { usedCount: 1 } }, { session });
+      await ResourceLock.updateMany({ hold: hold._id }, { $set: { booking: current._id }, $unset: { expiresAt: 1 } }, { session });
+      hold.status = 'converted'; hold.expiresAt = undefined; await hold.save({ session });
+      await Invoice.findOneAndUpdate({ booking: current._id }, { $setOnInsert: { invoiceNumber: `INV-${current.bookingId}`, booking: current._id, user: current.user, subtotal: current.amount, tax: current.tax, total: current.total, issuedAt: new Date() } }, { upsert: true, session });
+      await Notification.create([{ title: 'Booking confirmed', message: `Your booking ${current.bookingId} is confirmed. Open My Bookings for the schedule, seats and check-in details.`, audience: 'selected_customers', recipients: [current.user], kind: 'booking', booking: current._id, status: 'sent', sentAt: new Date() }], { session });
+      return { booking: current, checkInToken };
+    });
+    booking.set(result.booking.toObject());
+    return { booking, checkInToken: result.checkInToken };
+  }
   if (booking.status === 'confirmed' || booking.status === 'checked_in' || booking.status === 'completed') return { booking, checkInToken: bookingCheckInToken(booking) };
   const hold = await Hold.findOne({ _id: booking.hold, status: 'active', expiresAt: { $gt: new Date() } });
   if (!hold) throw Object.assign(new Error('The booking hold expired before payment could be finalized. Contact support for reconciliation.'), { status: 409 });

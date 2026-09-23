@@ -8,7 +8,8 @@
     "seed": "node src/seed.js",
     "migrate:pricing": "node src/migrate-pricing.js",
     "migrate:master-data": "node src/migrate-master-data.js",
-    "test": "node --test"
+    "test": "node --test",
+    "test:payments": "node --test checks/cashfree-integration.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -24,5 +25,8 @@
     "qrcode": "^1.5.4",
     "socket.io": "^4.8.1",
     "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^10.4.3"
   }
 }

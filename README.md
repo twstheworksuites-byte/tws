@@ -62,6 +62,8 @@ Set `GEMINI_API_KEY` and optionally `GEMINI_MODEL` in `server/.env`. The API key
 
 ## Cashfree payments
 
+For the current `tws-xi.vercel.app` / `tws-api-jy6w.onrender.com` deployment, see [CASHFREE_SETUP.md](CASHFREE_SETUP.md) for exact live settings and verification steps.
+
 For the current development phase, keep `PAYMENT_PROVIDER=mock`. The checkout button uses the protected direct-purchase endpoint: it skips external money transfer but creates the real booking, paid-status record, inventory locks, invoice, QR pass, notifications and admin activity. This endpoint is rejected automatically in production.
 
 Cashfree hosted checkout is implemented using its browser SDK and server-side order APIs. Configure these values in `server/.env`:
