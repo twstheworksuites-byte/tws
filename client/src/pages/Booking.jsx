@@ -193,11 +193,15 @@ export default function Booking() {
         total: quote.total * quantity,
       }
     : null;
-  const canContinue =
-    Boolean(quote) &&
+  const hasRequiredSelection =
+    Boolean(workspaceId) &&
     period.startAt.getTime() > Date.now() &&
-    workspaceAvailability === "available" &&
     (!workspaceSeats.length || selectedSeats.length > 0);
+  const canContinue =
+    hasRequiredSelection &&
+    (customer
+      ? Boolean(quote) && workspaceAvailability === "available"
+      : !availability || workspaceAvailability === "available");
 
   useEffect(() => {
     if (!customer || !selectionHold?._id || !selectedKey) return;
