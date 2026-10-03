@@ -1,0 +1,185 @@
+/* Final public-facing visual system. This file intentionally loads last. */
+:root{
+  --ink:#17201e;
+  --green:#183b34;
+  --green2:#2f6d5d;
+  --teal:#61ad96;
+  --accent:#c97845;
+  --accent2:#e7ad83;
+  --cream:#f3efe7;
+  --paper:#fcfbf8;
+  --line:#ded8cd;
+  --muted:#6c746f;
+  --radius:22px;
+  --shadow:0 24px 70px rgba(24,32,30,.09);
+}
+
+html{scroll-padding-top:82px}
+html,body,#root{max-width:100%;overflow-x:clip}
+body{background:var(--paper);font-feature-settings:'kern' 1,'liga' 1;text-rendering:optimizeLegibility}
+h1,h2{letter-spacing:-.058em}
+h1 em,h2 em{color:#8e5a3b}
+.eyebrow{font-size:10px;letter-spacing:.22em;color:var(--accent)}
+.section{padding-top:clamp(78px,9vw,120px);padding-bottom:clamp(78px,9vw,120px)}
+.btn{min-height:48px;padding:13px 23px;box-shadow:none}
+.btn-dark{background:var(--ink)}
+.btn-dark:hover{background:#29433d;box-shadow:0 13px 30px rgba(24,59,52,.18)}
+.btn-accent{background:var(--accent)}
+.btn-accent:hover{background:#b86738;box-shadow:0 13px 30px rgba(201,120,69,.24)}
+
+/* Calm, high-contrast navigation. */
+.site-header{height:78px;border-color:rgba(51,58,55,.1);background:rgba(252,251,248,.9);box-shadow:0 8px 35px rgba(22,32,29,.045)}
+.nav-shell{max-width:1440px;padding:0 clamp(22px,4vw,60px)}
+.logo{gap:13px;font-size:15px;letter-spacing:.035em}
+.logo .tws-mark{width:auto;height:auto;padding-right:12px;border-right:1px solid var(--line);font-size:23px;letter-spacing:-.08em;color:var(--ink)}
+.logo small{margin-top:4px;font-size:6.5px;letter-spacing:.24em;color:#7f8581}
+.nav-shell nav{gap:30px}
+.nav-shell nav>a:not(.btn){font-size:12px;font-weight:600;letter-spacing:.025em;color:#505955}
+.login-link{font-weight:600}
+
+/* Homepage: less motion, stronger hierarchy, more editorial spacing. */
+.simple-hero{min-height:min(780px,calc(100svh - 78px));background:#101815}
+.simple-hero-motion img{animation:none;inset:0;width:100%;height:100%;filter:saturate(.75) contrast(1.03) brightness(.88);object-position:center 48%}
+.simple-hero-motion i,.simple-hero-motion b{display:none}
+.simple-hero-shade{background:linear-gradient(90deg,rgba(9,20,17,.94) 0%,rgba(12,26,22,.72) 45%,rgba(10,19,17,.2) 78%),linear-gradient(0deg,rgba(7,16,14,.86),transparent 58%)}
+.simple-hero-copy{max-width:1320px;padding:clamp(92px,11vh,132px) 36px 178px}
+.hero-location{padding:8px 12px;border:1px solid rgba(255,255,255,.23);border-radius:999px;background:rgba(7,22,18,.28);font-size:10px;letter-spacing:.17em;backdrop-filter:blur(8px)}
+.simple-hero h1{max-width:920px;margin:32px 0 26px;font-size:clamp(60px,7.2vw,106px);line-height:.94}
+.simple-hero-copy>p{max-width:555px;color:#d4ded9;font-size:18px;line-height:1.7}
+.simple-hero-actions{margin-top:36px}
+.simple-proof{padding-top:24px;padding-bottom:24px;background:rgba(13,34,29,.9);border-color:rgba(255,255,255,.13)}
+.simple-proof>span{padding-inline:42px}
+.simple-proof b{font-size:13px;letter-spacing:.01em}
+.simple-proof small{font-size:11px;color:#abb9b4}
+.home-intro{gap:clamp(48px,8vw,110px)}
+.home-intro h2,.home-section-head h2,.home-amenities h2,.home-faq h2,.home-enquiry h2{line-height:1.02}
+.home-spaces{background:#f1ede5}
+.workspace-card{border-color:#e3ddd3;border-radius:20px;box-shadow:0 8px 30px rgba(24,32,30,.045)}
+.workspace-photo img{transition:transform .7s cubic-bezier(.16,1,.3,1)}
+.workspace-card-body h3{letter-spacing:-.045em}
+.home-price-grid>button,.step-cards article{border-radius:18px;box-shadow:0 8px 28px rgba(24,32,30,.035)}
+.home-amenities{background:#17231f}
+.home-enquiry{background:#111815}
+.enquiry-form{border:1px solid rgba(255,255,255,.08);box-shadow:0 30px 80px rgba(0,0,0,.18)}
+
+/* Inner pages share the same restrained editorial surface. */
+.page-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#efe9de 0%,#f7f4ed 68%,#eee7dc 100%)}
+.page-hero:after{content:'';position:absolute;right:-8%;top:-55%;width:40vw;aspect-ratio:1;border:1px solid rgba(201,120,69,.16);border-radius:50%;box-shadow:0 0 0 50px rgba(201,120,69,.025),0 0 0 100px rgba(201,120,69,.02);pointer-events:none}
+.page-hero>*{position:relative;z-index:1}
+.page-hero h1{line-height:.98}
+.workspace-grid{gap:22px}
+.filter-pills button,.tabs button{background:rgba(255,255,255,.65)}
+
+/* Booking: compact controls and a clear right-hand summary. */
+.booking-page,.checkout-page{background:linear-gradient(180deg,#f3efe7 0%,#faf8f3 38%,#f4f0e9 100%)}
+.booking-top,.checkout-top{height:64px;background:rgba(255,255,255,.82);backdrop-filter:blur(16px)}
+.booking-shell{max-width:1240px;grid-template-columns:minmax(0,1fr) 326px;gap:38px;padding-top:50px}
+.booking-main,.booking-flow{min-width:0}
+.checkout-shell{max-width:1120px;grid-template-columns:minmax(0,1fr) 342px;gap:38px;padding-top:50px}
+.booking-heading h1,.checkout-shell h1{font-size:clamp(44px,5vw,62px)}
+.booking-block{grid-template-columns:36px minmax(0,1fr);gap:18px;padding:36px 0}
+.block-number{width:28px;height:28px;display:grid;place-items:center;border:1px solid #dbc5b5;border-radius:50%;font-size:9px;background:#fff8f2}
+.booking-block h2{font-size:22px}
+.type-options{gap:10px}
+.type-options button{min-height:112px;padding:16px;border-radius:12px}
+.type-options button.active{padding:15px}
+.date-fields{gap:10px}
+.date-fields label{gap:7px;font-size:9px;letter-spacing:.1em}
+.date-fields label>div,.date-fields select{height:46px;border-radius:10px}
+.time-selects{height:46px!important;gap:2px!important;padding:4px 5px!important}
+.date-fields .time-selects select{height:36px;padding:0 4px;font-size:12px;background:#f6f2eb}
+.time-selects>b{font-size:12px;color:#8a8e89}
+.seat-map{border-radius:16px;box-shadow:0 18px 45px rgba(15,29,25,.12)}
+.booking-summary,.checkout-summary{top:96px;padding:19px;border-radius:16px;border-color:#e2d9cc;box-shadow:0 18px 50px rgba(44,37,30,.08)}
+.summary-image{height:124px;margin-bottom:18px}
+.booking-summary h2,.checkout-summary h2{margin-bottom:10px;font-size:21px}
+.booking-summary ul,.checkout-summary ul{margin:14px 0}
+.booking-summary li,.checkout-summary li{margin:8px 0;font-size:10.5px;line-height:1.4}
+.price-lines{padding:14px 0;gap:8px}
+.price-lines span{font-size:10.5px}.price-lines strong{font-size:14px}
+.summary-help{font-size:8.5px!important;line-height:1.5}
+.details-form{padding:26px;border:1px solid #e4ddd2;box-shadow:0 18px 50px rgba(44,37,30,.055)}
+
+/* Footer and support controls feel integrated rather than bolted on. */
+.site-footer{background:#111815}
+.footer-feature{gap:clamp(35px,6vw,90px)}
+.footer-map{border:1px solid rgba(255,255,255,.1)}
+.support-widget{right:20px;bottom:20px}
+.whatsapp-fab,.chat-fab{box-shadow:0 14px 38px rgba(20,37,32,.24)}
+
+@media(max-width:980px){
+  .booking-shell,.checkout-shell{grid-template-columns:minmax(0,1fr) 300px;gap:24px;padding-inline:24px}
+  .nav-shell nav{background:#fcfbf8}
+}
+
+@media(max-width:800px){
+  html{scroll-padding-top:68px}
+  .simple-hero{min-height:740px}
+  .simple-hero-copy{padding:82px 24px 232px}
+  .simple-hero h1{font-size:clamp(50px,11vw,72px)}
+  .simple-proof{padding-inline:24px}
+  .booking-shell,.checkout-shell{display:flex;flex-direction:column;padding:42px 20px 82px}
+  .booking-summary,.checkout-summary{position:relative;top:auto;order:2;width:100%;max-width:520px;margin:0 auto}
+  .booking-flow{order:1}
+  .checkout-shell>div{order:1}.checkout-summary{order:2}
+}
+
+@media(max-width:560px){
+  .site-header{height:66px}
+  .site-header .nav-shell{height:66px!important;padding-inline:14px!important}
+  .site-header .logo .tws-mark{padding-right:0;font-size:21px}
+  .nav-shell nav{top:66px}
+  .simple-hero{min-height:690px}
+  .simple-hero-motion img{object-position:62% center}
+  .simple-hero-copy{padding:68px 18px 226px}
+  .hero-location{font-size:8px;letter-spacing:.12em}
+  .simple-hero h1{margin-top:25px;font-size:clamp(43px,13vw,57px);line-height:.96}
+  .simple-hero-copy>p{font-size:15px;line-height:1.6}
+  .simple-hero-actions{gap:9px;margin-top:27px}
+  .simple-proof{padding:14px 18px}
+  .simple-proof>span{grid-template-columns:27px 1fr;padding:8px 0}
+  .simple-proof svg{width:19px}
+  .simple-proof b{font-size:11.5px}.simple-proof small{font-size:9.5px}
+  .home-section,.home-enquiry{padding:68px 18px}
+  .page-hero{padding:58px 18px}
+  .page-hero:after{right:-35%;top:-18%;width:80vw}
+  .page-hero h1{font-size:clamp(40px,12vw,50px)}
+  .booking-top,.checkout-top{height:56px;padding:0 14px;font-size:10px}
+  .stepper{gap:5px}.stepper i{width:14px}.stepper span{font-size:8.5px}.stepper b{width:19px;height:19px;font-size:8px}
+  .secure-note{display:none}
+  .booking-shell,.checkout-shell{gap:24px;padding:34px 14px 70px}
+  .booking-heading h1,.checkout-shell h1{font-size:39px;line-height:1}
+  .booking-heading>p:last-child{font-size:13px}
+  .load-error{max-width:100%;overflow:hidden;padding-inline:14px}.load-error h3,.load-error p{max-width:100%;overflow-wrap:anywhere}
+  .booking-block{display:block;padding:29px 0}
+  .block-number{margin-bottom:13px}
+  .booking-block h2{font-size:20px}
+  .type-options{grid-template-columns:1fr 1fr}
+  .type-options button{min-height:102px;padding:13px}
+  .type-options button.active{padding:12px}
+  .type-options span{font-size:12px}.type-options small{font-size:9px;line-height:1.35}.type-options b{font-size:9px}
+  .date-fields{grid-template-columns:1fr 1fr;align-items:end}
+  .date-fields label:first-child{grid-column:1/-1}
+  .date-fields label>div,.date-fields select{height:44px}
+  .time-selects{height:44px!important;max-width:100%;padding:4px!important}
+  .date-fields .time-selects select{height:34px;min-width:0;max-width:30%;padding:0 2px;font-size:11px}
+  .date-fields .time-selects select:last-child{max-width:34%;margin-left:2px}
+  .seat-map{padding:17px 12px}.seat-grid{gap:6px}
+  .booking-summary,.checkout-summary{max-width:100%;padding:16px;border-radius:14px}
+  .summary-image{height:112px;margin-bottom:15px}
+  .booking-summary h2,.checkout-summary h2{font-size:19px}
+  .booking-summary li,.checkout-summary li{font-size:10px}
+  .details-form{padding:19px 15px;margin-top:25px}
+  .form-grid{grid-template-columns:1fr;gap:16px}
+  .checkout-top>span{padding:6px 9px;font-size:9px}
+  .support-widget{right:12px;bottom:12px}
+}
+
+@media(max-width:370px){
+  .type-options{grid-template-columns:1fr}
+  .type-options button{min-height:88px}
+  .date-fields{grid-template-columns:1fr}
+  .date-fields label:first-child{grid-column:auto}
+}
+
+@media(prefers-reduced-motion:reduce){.simple-hero-motion img{transform:none!important}}

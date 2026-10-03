@@ -16,17 +16,17 @@ import {
 import { useApp } from "../context";
 
 const nav = [
-  ["Spaces", "/home#spaces"],
-  ["Pricing", "/home#pricing"],
+  ["Spaces", "/#spaces"],
+  ["Pricing", "/#pricing"],
   ["Gallery", "/gallery"],
-  ["Amenities", "/home#amenities"],
-  ["Enquire", "/home#enquire"],
+  ["Amenities", "/#amenities"],
+  ["Enquire", "/#enquire"],
 ];
 export function Logo({ light = false }) {
   return (
     <Link
       className={`logo ${light ? "logo-light" : ""}`}
-      to="/home"
+      to="/"
       aria-label="TWS — The Work Suites"
     >
       <span className="logo-mark tws-mark">TWS</span>
@@ -201,7 +201,7 @@ export function Footer() {
                 {phone}
               </a>
             ) : (
-              <Link to="/home#enquire">
+              <Link to="/#enquire">
                 <Phone />
                 Request a call
               </Link>
@@ -212,7 +212,7 @@ export function Footer() {
                 {email}
               </a>
             ) : (
-              <Link to="/home#enquire">
+              <Link to="/#enquire">
                 <Mail />
                 Send an enquiry
               </Link>

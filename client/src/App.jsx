@@ -13,7 +13,6 @@ import{CustomerDashboard,Invoices,MyBookings,Notifications,Profile}from'./pages/
 import{AdminBookings,AdminMap,CancellationRequests,Dashboard,Reports,ResourceList}from'./pages/Admin';
 import SupportWidget from'./components/SupportWidget';
 import InfoPage from'./pages/Info';
-import Entrance from'./pages/Entrance';
 import{Contact,Pricing}from'./pages/Marketing';
 import{About,Amenities,Gallery,SeatingPlans}from'./pages/Discover';
 import BookingConfirmation from'./pages/BookingConfirmation';
@@ -28,15 +27,14 @@ function RequireAuth({admin=false,children}){
  if(!admin&&user.role!=='customer')return <Navigate to="/admin" replace/>;
  return children;
 }
-function NotFound(){return <section className="not-found"><span>404</span><h1>This space<br/><em>doesn't exist.</em></h1><a className="btn btn-dark" href="/home">Return home</a></section>}
+function NotFound(){return <section className="not-found"><span>404</span><h1>This space<br/><em>doesn't exist.</em></h1><a className="btn btn-dark" href="/">Return home</a></section>}
 function ScrollToTop(){const{pathname,search,hash}=useLocation();useEffect(()=>{if(hash){requestAnimationFrame(()=>document.querySelector(hash)?.scrollIntoView({block:'start'}));return}window.scrollTo({top:0,left:0,behavior:'auto'})},[pathname,search,hash]);return null}
 
 export default function App(){
- const location=useLocation(),isImmersive=location.pathname==='/',isPortal=location.pathname.startsWith('/customer')||location.pathname.startsWith('/admin');
+ const location=useLocation(),isPortal=location.pathname.startsWith('/customer')||location.pathname.startsWith('/admin');
  return <><ScrollToTop/><Routes>
-  <Route path="/" element={<Entrance/>}/>
   <Route element={<PublicLayout/>}>
-   <Route path="home" element={<Home/>}/><Route path="about" element={<About/>}/><Route path="workspaces" element={<Workspaces/>}/><Route path="seating-plans" element={<SeatingPlans/>}/><Route path="pricing" element={<Pricing/>}/><Route path="get-space" element={<Navigate to="/book" replace/>}/><Route path="lease" element={<Navigate to="/book?mode=lease" replace/>}/><Route path="amenities" element={<Amenities/>}/><Route path="gallery" element={<Gallery/>}/><Route path="contact" element={<Contact/>}/><Route path="book" element={<Booking/>}/>
+   <Route index element={<Home/>}/><Route path="home" element={<Home/>}/><Route path="about" element={<About/>}/><Route path="workspaces" element={<Workspaces/>}/><Route path="seating-plans" element={<SeatingPlans/>}/><Route path="pricing" element={<Pricing/>}/><Route path="get-space" element={<Navigate to="/book" replace/>}/><Route path="lease" element={<Navigate to="/book?mode=lease" replace/>}/><Route path="amenities" element={<Amenities/>}/><Route path="gallery" element={<Gallery/>}/><Route path="contact" element={<Contact/>}/><Route path="book" element={<Booking/>}/>
    <Route path="checkout" element={<RequireAuth><Checkout/></RequireAuth>}/><Route path="booking-confirmation/:id" element={<RequireAuth><BookingConfirmation/></RequireAuth>}/>
    <Route path="login" element={<Login/>}/><Route path="register" element={<Register/>}/><Route path="forgot-password" element={<ForgotPassword/>}/><Route path="reset-password" element={<ResetPassword/>}/>
    <Route path="faq" element={<InfoPage type="faq"/>}/><Route path="privacy" element={<InfoPage type="privacy"/>}/><Route path="terms" element={<InfoPage type="terms"/>}/><Route path="*" element={<NotFound/>}/>
@@ -44,5 +42,5 @@ export default function App(){
   <Route path="customer" element={<RequireAuth><CustomerLayout/></RequireAuth>}><Route index element={<CustomerDashboard/>}/><Route path="bookings" element={<MyBookings/>}/><Route path="profile" element={<Profile/>}/><Route path="invoices" element={<Invoices/>}/><Route path="notifications" element={<Notifications/>}/><Route path="*" element={<Navigate to="/customer" replace/>}/></Route>
   <Route path="admin/login" element={<AdminLogin/>}/>
   <Route path="admin" element={<RequireAuth admin><AdminLayout/></RequireAuth>}><Route index element={<Dashboard/>}/><Route path="map" element={<AdminMap/>}/><Route path="bookings" element={<AdminBookings/>}/><Route path="leases" element={<AdminLeases/>}/><Route path="cancellations" element={<CancellationRequests/>}/><Route path="maintenance" element={<Navigate to="/admin/workspaces" replace/>}/><Route path="workspaces" element={<ResourceList kind="workspaces"/>}/><Route path="reports" element={<Reports/>}/><Route path="business" element={<AdminBusiness/>}/><Route path="*" element={<Navigate to="/admin" replace/>}/></Route>
- </Routes><Toasts/>{!isImmersive&&!isPortal&&<SupportWidget/>}</>;
+ </Routes><Toasts/>{!isPortal&&<SupportWidget/>}</>;
 }

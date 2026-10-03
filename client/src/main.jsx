@@ -5,4 +5,5 @@ import{AppProvider}from'./context';
 import App from './App';
 import './styles.css';
 import './entrance-refine.css';
+import './premium.css';
 createRoot(document.getElementById('root')).render(<React.StrictMode><BrowserRouter><AppProvider><App/></AppProvider></BrowserRouter></React.StrictMode>);

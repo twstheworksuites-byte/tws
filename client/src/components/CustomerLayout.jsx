@@ -16,7 +16,7 @@ export default function CustomerLayout(){
    <Logo light/><button className="portal-close" onClick={()=>setOpen(false)} aria-label="Close navigation"><X/></button>
    <div className="portal-person"><span>{user?.name?.[0]||'C'}</span><div><strong>{user?.name||'Customer'}</strong><small>{user?.email}</small></div></div>
    <nav>{links.map(([label,to,Icon])=><NavLink end={to==='/customer'} to={to} onClick={()=>setOpen(false)} key={label}><Icon/>{label}</NavLink>)}</nav>
-   <div className="portal-sidebar-bottom"><NavLink to="/home" onClick={()=>setOpen(false)}><Home/>Public website</NavLink><button onClick={signOut}><LogOut/>Sign out</button></div><small className="portal-powered">Powered by MERNPixel</small>
+   <div className="portal-sidebar-bottom"><NavLink to="/" onClick={()=>setOpen(false)}><Home/>Public website</NavLink><button onClick={signOut}><LogOut/>Sign out</button></div><small className="portal-powered">Powered by MERNPixel</small>
   </aside>
   <main className="customer-main"><Outlet/></main>
  </div>
