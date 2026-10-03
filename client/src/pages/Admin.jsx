@@ -20,8 +20,8 @@ function Modal({ title, copy, onClose, children }) {
 export function Dashboard() {
   const [data,setData]=useState(null),{operationsVersion}=useApp();
   useEffect(()=>{api('/admin/dashboard').then(setData)},[operationsVersion]);
-  if(!data)return <AdminPage title="Good morning." copy="Here’s how the workspace is moving today."><Loading cards={4}/></AdminPage>;
-  return <AdminPage title="Good morning." copy="Here’s how the workspace is moving today.">
+  if(!data)return <AdminPage title="Welcome back." copy="Here’s how the workspace is moving today."><Loading cards={4}/></AdminPage>;
+  return <AdminPage title="Welcome back." copy="Here’s how the workspace is moving today.">
     <div className="metric-grid">{[[data.available,'Available now','spaces ready',Activity,'teal'],[data.occupied,'Bookings today',`${money(data.today?.revenue)} paid today`,CalendarCheck,'orange'],[data.customers,'Customers','registered accounts',Users,'cream'],[data.successfulPayments,'Purchased bookings',`${money(data.paidRevenue)} total`,CheckCircle2,'gray']].map(([value,label,note,Icon,tone])=><article className={`metric ${tone}`} key={label}><Icon/><span>{label}</span><strong>{value}</strong><small>{note}</small></article>)}</div>
   </AdminPage>;
 }
