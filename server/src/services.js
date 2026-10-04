@@ -62,7 +62,8 @@ export function calculateQuote(workspace, durationType, startAt, endAt) {
   const units = { hourly: hours, daily: Math.ceil(hours / 24), weekly: Math.ceil(hours / 168), monthly: Math.ceil(hours / 720) }[durationType];
   const rate = workspace.pricing?.[durationType];
   if (!rate || units <= 0) throw Object.assign(new Error('Pricing is not configured for this duration.'), { status: 422 });
-  const base = Math.round(rate * units * 100) / 100;
+  const meetingPackage = workspace.type === 'meeting_room' && durationType === 'hourly' ? ({ 4: 2156, 8: 4312 })[hours] : undefined;
+  const base = meetingPackage ?? Math.round(rate * units * 100) / 100;
   const tax = Math.round(base * config.taxRate * 100) / 100;
   return { base, tax, discount: 0, total: base + tax };
 }
@@ -174,6 +175,25 @@ export async function finalizePaidBooking(booking, paymentId = 'server-verified'
   hold.status = 'converted'; hold.expiresAt = undefined; await hold.save();
   await Invoice.findOneAndUpdate({ booking: booking._id }, { $setOnInsert: { invoiceNumber: `INV-${booking.bookingId}`, booking: booking._id, user: booking.user, subtotal: booking.amount, tax: booking.tax, total: booking.total, issuedAt: new Date() } }, { upsert: true, new: true });
   await createCustomerNotification(booking.user, { title: 'Booking confirmed', message: `Your booking ${booking.bookingId} is confirmed. Open My Bookings for the schedule, seats and check-in details.`, kind: 'booking', booking: booking._id });
+  return { booking, checkInToken };
+}
+
+export async function finalizeBookingWithoutPayment(booking) {
+  const hold = await Hold.findOne({ _id: booking.hold, status: 'active', expiresAt: { $gt: new Date() } });
+  if (!hold) throw Object.assign(new Error('The booking hold expired. Please select the workspace again.'), { status: 409 });
+  const expectedLocks = slotsBetween(booking.startAt, booking.endAt).length * Math.max(1, booking.seats?.length || 0);
+  const lockCount = await ResourceLock.countDocuments({ hold: hold._id });
+  if (lockCount !== expectedLocks) throw Object.assign(new Error('The selected workspace is no longer available.'), { status: 409 });
+  const checkInToken = bookingCheckInToken(booking), { hash, salt } = hashValue(checkInToken);
+  booking.status = 'confirmed';
+  booking.payment.provider = 'disabled';
+  booking.payment.method = 'pay_at_office';
+  booking.payment.status = 'pending';
+  booking.checkInTokenHash = `${salt}:${hash}`;
+  await booking.save();
+  await ResourceLock.updateMany({ hold: hold._id }, { $set: { booking: booking._id }, $unset: { expiresAt: 1 } });
+  hold.status = 'converted'; hold.expiresAt = undefined; await hold.save();
+  await createCustomerNotification(booking.user, { title: 'Booking recorded', message: `Your booking ${booking.bookingId} is recorded. TWS will contact you to complete payment and confirm any final details.`, kind: 'booking', booking: booking._id });
   return { booking, checkInToken };
 }
 

@@ -149,7 +149,7 @@ export default function LeaseBookingPanel({ workspaces = [] }) {
             >
               {leaseSpaces.map((item) => (
                 <option key={item._id} value={item._id}>
-                  {item.name} · {item.capacity || "capacity on request"} seats
+                  {item.name} · {item.capacity ? `${item.capacity} seats` : 'count confirmed by TWS'}
                 </option>
               ))}
             </select>

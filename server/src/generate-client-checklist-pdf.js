@@ -116,7 +116,7 @@ section(2, 'Prices and taxes', 'Please clearly mention whether each price is per
 item('Confirm: Hot / Flexi Desk — ₹7,999 per month');
 item('Confirm: Dedicated Desk — ₹8,999 per month');
 item('Confirm: Private Cabin — ₹9,999 per month');
-item('Confirm: Day Package — ₹500 per day');
+item('Confirmed: Meeting Room — ₹599/hour, ₹2,156/4 hours, ₹4,312/8 hours');
 item('Is the private-cabin price per seat or for the complete cabin?');
 item('Meeting-room price: hourly, daily and monthly');
 item('Conference-room price: hourly, daily and monthly');

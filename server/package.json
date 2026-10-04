@@ -6,7 +6,6 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "seed": "node src/seed.js",
-    "migrate:pricing": "node src/migrate-pricing.js",
     "migrate:master-data": "node src/migrate-master-data.js",
     "test": "node --test",
     "test:payments": "node --test checks/cashfree-integration.js"

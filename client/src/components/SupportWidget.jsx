@@ -8,7 +8,7 @@ const quickPrompts = ['What spaces do you have?', 'How does yearly lease work?',
 
 export default function SupportWidget(){
   const[open,setOpen]=useState(false),[input,setInput]=useState(''),[busy,setBusy]=useState(false),[messages,setMessages]=useState([{from:'bot',text:'Hi! I’m your TWS guide. Ask me about cabins, meeting spaces, booking, yearly leases, facilities or location.'}]);
-  const location=useLocation(),number=import.meta.env.VITE_WHATSAPP_NUMBER;
+  const location=useLocation(),number=import.meta.env.VITE_WHATSAPP_NUMBER||'917778886839';
   if(location.pathname.startsWith('/admin'))return null;
   const whatsappText=encodeURIComponent(`Hi, I need help with TWS · The Work Suites${location.pathname==='/book'?' booking':''}.`);
   const whatsappUrl=number?`https://wa.me/${number.replace(/\D/g,'')}?text=${whatsappText}`:'#contact';

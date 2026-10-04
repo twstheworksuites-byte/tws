@@ -11,7 +11,7 @@ export const config = {
   holdMinutes: Number(process.env.HOLD_MINUTES || 10),
   taxRate: Number(process.env.TAX_RATE || .18),
   bookingPrefix: process.env.BOOKING_PREFIX || 'TWS',
-  paymentProvider: process.env.PAYMENT_PROVIDER || 'mock'
+  paymentProvider: process.env.ENABLE_ONLINE_PAYMENTS === 'true' ? (process.env.PAYMENT_PROVIDER || 'disabled') : 'disabled'
 };
 
 export function validateProductionConfig(){if(config.env!=='production')return;const missing=[];if(!process.env.MONGODB_URI)missing.push('MONGODB_URI');if(!process.env.JWT_SECRET||process.env.JWT_SECRET.length<32)missing.push('JWT_SECRET (32+ characters)');if(!config.clientUrl.split(',').every(url=>url.startsWith('https://')))missing.push('HTTPS CLIENT_URL');if(!['cashfree','disabled'].includes(config.paymentProvider))missing.push('PAYMENT_PROVIDER=cashfree or disabled');if(config.paymentProvider==='cashfree'&&!process.env.CASHFREE_APP_ID)missing.push('CASHFREE_APP_ID');if(config.paymentProvider==='cashfree'&&!process.env.CASHFREE_SECRET_KEY)missing.push('CASHFREE_SECRET_KEY');if(config.paymentProvider==='cashfree'&&!['sandbox','production'].includes(process.env.CASHFREE_ENV))missing.push('CASHFREE_ENV=sandbox or production');if(missing.length)throw new Error(`Production configuration missing: ${missing.join(', ')}`);}

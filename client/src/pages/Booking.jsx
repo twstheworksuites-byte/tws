@@ -482,12 +482,7 @@ export default function Booking() {
                     const state =
                         availabilityByWorkspace.get(String(item._id)) ||
                         "available",
-                      capacity =
-                        item.type === "meeting_room"
-                          ? "Capacity on request"
-                          : item.type === "conference_room"
-                            ? "22 + 1 seats"
-                            : `${item.capacity} seats`;
+                      capacity = item.capacity ? `${item.capacity} seats` : 'Desk count confirmed by TWS';
                     return (
                       <button
                         key={item._id}
@@ -629,7 +624,7 @@ export default function Booking() {
               <div className="map-wrap">
                 <div className="map-heading">
                   <div>
-                    <h2>Select one or more seats</h2>
+                    <h2>{['private_cabin','meeting_room'].includes(workspace?.type)?'Select one or more available units':'Select one or more seats'}</h2>
                     <p>
                       {
                         workspaceSeats.filter(
@@ -650,6 +645,7 @@ export default function Booking() {
                   seats={workspaceSeats}
                   selected={selectedIds}
                   onSelect={toggleSeat}
+                  kind={workspace?.type}
                 />
               </div>
             </div>
@@ -718,7 +714,7 @@ export default function Booking() {
                 : workspaceAvailability !== "available"
                   ? "Choose an available space"
                   : user
-                    ? "Continue to buy"
+                    ? "Continue to book"
                     : "Continue to customer login"}{" "}
             <ArrowRight />
           </button>

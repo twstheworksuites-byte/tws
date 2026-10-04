@@ -69,6 +69,12 @@ export default function Checkout() {
       const Cashfree = payment?.provider === 'cashfree' ? await loadCashfree() : null;
       const checkout = await api('/bookings/checkout', { method: 'POST', body: JSON.stringify({ holdId: booking.hold._id, couponCode: coupon?.coupon.code, customer: details }) });
       const id = checkout.booking._id;
+      if (checkout.paymentDisabled) {
+        setBooking({});
+        toast('Booked — TWS will contact you to complete payment');
+        if (checkout.whatsappUrl) window.open(checkout.whatsappUrl, '_blank', 'noopener,noreferrer');
+        return navigate(`/booking-confirmation/${id}`, { replace: true });
+      }
       setPendingBookingId(id);
       setBooking({ ...booking, paymentBookingId: id, quote: { base: checkout.booking.amount, tax: checkout.booking.tax, discount: checkout.booking.discount, total: checkout.booking.total } });
       setCoupon(null);
@@ -98,17 +104,17 @@ export default function Checkout() {
         <label>Company <small>Optional</small><input readOnly={!!pendingBookingId} value={details.company} onChange={event => setDetails({ ...details, company: event.target.value })} placeholder="Company name" /></label>
         <label>GSTIN <small>Optional</small><input readOnly={!!pendingBookingId} value={details.gstin} onChange={event => setDetails({ ...details, gstin: event.target.value })} placeholder="For your tax invoice" /></label>
       </div><div className="payment-panel"><div><CheckCircle2 /><span>
-        <strong>{payment?.provider === 'cashfree' ? 'Secure payment with Cashfree' : payment?.provider === 'mock' ? 'Test checkout' : 'Online payment'}</strong>
-        <small>{paymentError || (payment?.provider === 'cashfree' ? payment.mode === 'production' ? 'Choose your payment method in Cashfree checkout.' : 'Sandbox mode — no real payment is collected.' : payment?.provider === 'mock' ? 'Development mode — no real payment is collected.' : payment ? 'Online payments are currently unavailable. Please contact TWS.' : 'Checking payment availability…')}</small>
-      </span></div><p>Your booking is confirmed after payment verification. If you were charged but confirmation is pending, check the payment status before paying again.</p></div></form>
+        <strong>{payment?.provider === 'cashfree' ? 'Secure payment with Cashfree' : payment?.provider === 'mock' ? 'Test checkout' : 'Book now, pay with TWS'}</strong>
+        <small>{paymentError || (payment?.provider === 'cashfree' ? payment.mode === 'production' ? 'Choose your payment method in Cashfree checkout.' : 'Sandbox mode — no real payment is collected.' : payment?.provider === 'mock' ? 'Development mode — no real payment is collected.' : payment ? 'Online payment is disabled. TWS will contact you to complete payment.' : 'Checking booking availability…')}</small>
+      </span></div><p>{payment?.enabled?'Your booking is confirmed after payment verification.':'Your booking is recorded immediately and WhatsApp opens with the booking details for the TWS office.'}</p></div></form>
     </div><aside className="checkout-summary"><p className="eyebrow">Booking summary</p><h2>{booking.workspace?.name}</h2>
       <ul><li><MapPin />{booking.workspace?.zone || 'Bannerghatta Road, Bengaluru'}</li><li><CalendarDays />{booking.date} at {booking.start}</li>{bookingSeats.length > 0 && <li><LockKeyhole />{bookingSeats.length} seat{bookingSeats.length > 1 ? 's' : ''}: {bookingSeats.map(item => item.number).join(', ')}</li>}</ul>
       <div className="coupon-entry"><input disabled={busy || !!pendingBookingId} value={couponCode} onChange={event => { setCouponCode(event.target.value.toUpperCase()); setCoupon(null); }} placeholder="Offer code" /><button type="button" disabled={busy || !!pendingBookingId || couponBusy || couponCode.trim().length < 2} onClick={applyCoupon}>{couponBusy ? 'Checking…' : 'Apply'}</button></div>
       {coupon && <p className="coupon-success"><CheckCircle2 /> {coupon.coupon.code} · {coupon.coupon.name}</p>}
       <div className="price-lines"><span>Subtotal <b>{money(quote?.base)}</b></span>{quote?.discount > 0 && <span>Offer discount <b>− {money(quote.discount)}</b></span>}<span>GST <b>{money(quote?.tax)}</b></span><strong>Total <b>{money(quote?.total)}</b></strong></div>
-      <button form="checkout-form" className="btn btn-accent btn-wide" disabled={busy || couponBusy || seconds <= 0 || !payment?.enabled}>{seconds <= 0 ? 'Hold expired' : busy ? 'Checking payment…' : !payment?.enabled ? 'Payment unavailable' : payment.provider === 'mock' ? 'Confirm test booking' : `Pay ${money(quote?.total)}`} <ArrowRight /></button>
+      <button form="checkout-form" className="btn btn-accent btn-wide" disabled={busy || couponBusy || seconds <= 0 || !payment}>{seconds <= 0 ? 'Hold expired' : busy ? 'Confirming booking…' : !payment ? 'Checking…' : !payment.enabled ? 'Book now & open WhatsApp' : payment.provider === 'mock' ? 'Confirm test booking' : `Pay ${money(quote?.total)}`} <ArrowRight /></button>
       {pendingBookingId && <button type="button" className="text-button" disabled={busy} onClick={checkPayment}>Check payment status</button>}
-      <small className="secure-line"><LockKeyhole />{payment?.provider === 'cashfree' ? 'Payments processed by Cashfree' : 'Confirmation after verification'}</small>
+      <small className="secure-line"><LockKeyhole />{payment?.provider === 'cashfree' ? 'Payments processed by Cashfree' : 'Online payment is currently disabled'}</small>
     </aside></div>
   </section>;
 }

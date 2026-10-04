@@ -3,7 +3,7 @@ import { z } from 'zod';
 import PDFDocument from 'pdfkit';
 import { Booking, Coupon, Hold, Invoice, Maintenance, Notification, ResourceLock, Seat, User, Workspace } from '../models.js';
 import { authenticate, authorize, validate } from '../middleware.js';
-import { audit, bookingCheckInToken, bookingReference, calculateQuote, createCustomerNotification, createPaymentOrder, finalizePaidBooking, notifyBooking, qrDataUrl, resourceKey, slotsBetween, verifyHash, verifyPayment } from '../services.js';
+import { audit, bookingCheckInToken, bookingReference, calculateQuote, createCustomerNotification, createPaymentOrder, finalizeBookingWithoutPayment, finalizePaidBooking, notifyBooking, qrDataUrl, resourceKey, slotsBetween, verifyHash, verifyPayment } from '../services.js';
 import { config } from '../config.js';
 
 const router = Router();
@@ -68,7 +68,6 @@ router.post('/coupon',authenticate,validate(z.object({holdId:z.string(),code:z.s
 const checkoutSchema = z.object({ holdId: z.string(), couponCode:z.string().trim().min(2).optional(), customer: z.object({ name: z.string().min(2), email: z.string().email(), mobile: z.string().min(7), company: z.string().optional(), gstin: z.string().optional() }) });
 router.post('/checkout', authenticate, validate(checkoutSchema), async (req, res, next) => {
   try {
-    if(config.paymentProvider==='disabled')return res.status(503).json({message:'Online payments are coming soon. Please use Request a purchase call and the TWS team will help you complete the booking.'});
     const hold = await Hold.findOne({ _id: req.validated.holdId, owner: req.user._id, status: 'active', expiresAt: { $gt: new Date() } });
     if (!hold) return res.status(410).json({ message: 'Your hold has expired. Please select the workspace again.' });
     const existing = await Booking.findOne({ hold: hold._id });
@@ -80,6 +79,19 @@ router.post('/checkout', authenticate, validate(checkoutSchema), async (req, res
     const coupon=req.validated.couponCode?await activeCoupon(req.validated.couponCode):null,quote=coupon?couponQuote(hold.quote,coupon):hold.quote;
     const reference = bookingReference();
     const booking = await Booking.create({ bookingId: reference, user: req.user._id, workspace: hold.workspace, seat: hold.seat,seats:hold.seats, hold: hold._id, startAt: hold.startAt, endAt: hold.endAt, durationType: hold.durationType, amount: quote.base, tax: quote.tax, discount: quote.discount, total: quote.total, couponCode:coupon?.code, customer: req.validated.customer, payment: { provider: config.paymentProvider, orderId: config.paymentProvider === 'cashfree' ? reference.replaceAll('-', '_') : undefined, status: 'pending' } });
+    if(config.paymentProvider==='disabled'){
+      const workspace=await Workspace.findById(booking.workspace).lean();
+      const {checkInToken}=await finalizeBookingWithoutPayment(booking);
+      await User.findByIdAndUpdate(req.user._id,{$set:req.validated.customer});
+      const schedule=new Date(booking.startAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',dateStyle:'medium',timeStyle:'short'});
+      const message=encodeURIComponent(`Booked\nBooking: ${booking.bookingId}\nSpace: ${workspace?.name||'TWS workspace'}\nCustomer: ${booking.customer.name}\nMobile: ${booking.customer.mobile}\nSchedule: ${schedule} IST`);
+      const officeNumber=String(process.env.BUSINESS_WHATSAPP||process.env.BUSINESS_PHONE||'917778886839').replace(/\D/g,'');
+      req.app.get('io').emit('availability:update',{workspaceId:booking.workspace,seatId:booking.seat,reason:'booking_confirmed'});
+      req.app.get('io').emit('operations:update',{resource:'booking',action:'confirmed_without_online_payment',id:booking._id});
+      await audit(req,'booking.confirmed_without_online_payment','Booking',booking._id,{bookingId:booking.bookingId});
+      notifyBooking(booking,'confirmed').catch(error=>console.error('Booking email failed',error.message));
+      return res.status(201).json({booking,checkInToken,whatsappUrl:`https://wa.me/${officeNumber}?text=${message}`,paymentDisabled:true});
+    }
     const paymentOrder = await createPaymentOrder(booking); booking.payment.orderId = paymentOrder.orderId; await booking.save();
     await User.findByIdAndUpdate(req.user._id, { $set: req.validated.customer });
     req.app.get('io').emit('operations:update', { resource: 'booking', action: 'created', id: booking._id });
