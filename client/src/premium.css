@@ -401,5 +401,39 @@ p{color:var(--muted)}
 @media(max-width:520px){.confirmed-price-grid{grid-template-columns:1fr}.confirmed-price-grid>article{padding:22px}}
 
 .type-options button>span{min-width:0;width:100%}
+.type-options button>span:first-child{align-items:flex-start;gap:8px}
+.type-options button>span:first-child>span:first-child{min-width:0;font-weight:600;line-height:1.22}
 .type-options .space-state{flex:0 0 auto;white-space:nowrap;overflow-wrap:normal;word-break:normal}
-@media(max-width:560px){.type-options .space-state{padding:5px 7px;font-size:6.5px;letter-spacing:.06em}}
+.policy-page p,.workspace-card-body>p,.home-intro p,.home-section-head p,.contact-details strong{font-weight:400;line-height:1.65}
+.policy-page h2,.workspace-card-body h3,.home-price-grid h3,.contact-details span{font-weight:600}
+@media(max-width:560px){
+  .type-options .space-state{padding:5px 7px;font-size:6.5px;letter-spacing:.05em}
+  .type-options button>span:first-child{gap:5px}
+  .type-options button>span:first-child>span:first-child{font-size:12px}
+}
+
+/* Pricing page: compact editorial cards with a strong, readable price block. */
+.pricing-page .pricing-grid{gap:20px}
+.pricing-page .pricing-grid article{display:flex;min-height:510px;flex-direction:column;padding:30px;border-radius:16px;background:#fffdf8}
+.pricing-page .pricing-grid article:before{right:-58px;top:-62px;width:150px;height:150px;background:rgba(212,169,79,.08)}
+.pricing-page .pricing-grid article>span{display:grid;width:30px;height:30px;place-items:center;border:1px solid #dfd3bc;border-radius:50%;color:#9a7131;font-size:8px;font-weight:700;letter-spacing:.08em}
+.pricing-page .pricing-grid h2{margin:27px 0 12px;font-size:32px;line-height:1}
+.pricing-page .pricing-grid article>p{min-height:64px;margin:0;color:var(--muted);font-size:12px;font-weight:400;line-height:1.65}
+.pricing-page .plan-rates{display:block;margin:22px 0}
+.pricing-page .plan-rates div{display:flex;min-height:82px;align-items:flex-end;justify-content:space-between;gap:15px;padding:17px 18px;border:1px solid rgba(212,169,79,.25);border-radius:11px;background:#151716;color:#fff}
+.pricing-page .plan-rates div>small{align-self:flex-start;margin:0;color:#d4a94f;font-size:7px;font-weight:700;letter-spacing:.15em}
+.pricing-page .plan-rates strong{display:flex;align-items:baseline;gap:5px;color:#fff;font-family:'DM Sans',sans-serif;font-size:23px;font-weight:600;letter-spacing:-.035em}
+.pricing-page .plan-rates strong small{margin:0;color:#aaa9a4;font-size:7px;font-weight:600;letter-spacing:.07em}
+.pricing-page .pricing-grid ul{display:flex;min-height:0;flex:1;flex-direction:column;gap:0;margin:0 0 24px}
+.pricing-page .pricing-grid li{min-height:39px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #eee8dd;color:#3f423f;font-size:10px;line-height:1.45}
+.pricing-page .pricing-grid li:last-child{border-bottom:0}
+.pricing-page .pricing-grid li svg{width:14px;min-width:14px;color:#a77d38}
+.pricing-page .pricing-grid .btn{min-height:52px;margin-top:auto;border-radius:10px}
+@media(max-width:900px){.pricing-page .pricing-grid article{min-height:480px}}
+@media(max-width:640px){
+  .pricing-page .pricing-grid{gap:14px}
+  .pricing-page .pricing-grid article{min-height:0;padding:24px 20px}
+  .pricing-page .pricing-grid article>p{min-height:0}
+  .pricing-page .plan-rates{margin:19px 0 13px}
+  .pricing-page .pricing-grid ul{margin-bottom:20px}
+}

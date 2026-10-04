@@ -56,7 +56,7 @@ export function AdminLogin() {
     <p className="eyebrow">Secure operations portal</p><h1>Admin <em>access.</em></h1>
     <p>For the authorized TWS administrator only.</p>
     <form onSubmit={submit} className="auth-form">
-      <label>Admin email<div className="input-icon"><Mail /><input type="email" required autoFocus value={email} onChange={event => setEmail(event.target.value)} autoComplete="username" placeholder="admin@tws.com" /></div></label>
+      <label>Admin email<div className="input-icon"><Mail /><input type="email" required autoFocus value={email} onChange={event => setEmail(event.target.value)} autoComplete="username" aria-label="Admin email address" /></div></label>
       <PasswordField value={password} onChange={event => setPassword(event.target.value)} />
       <button className="btn btn-dark btn-wide" disabled={busy}>{busy ? 'Verifying access…' : 'Enter admin portal'} <ShieldCheck /></button>
     </form>

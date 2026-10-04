@@ -4,9 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpRight,
   CalendarDays,
-  Facebook,
-  Instagram,
-  Linkedin,
   Mail,
   MapPin,
   Menu,
@@ -111,7 +108,7 @@ export function Footer() {
       "Bannerghatta Main Road, Kothnur, Kalena Agrahara, Bengaluru, Karnataka 560083",
     hours = import.meta.env.VITE_BUSINESS_HOURS,
     email = import.meta.env.VITE_BUSINESS_EMAIL,
-    phone = import.meta.env.VITE_BUSINESS_PHONE;
+    phone = import.meta.env.VITE_BUSINESS_PHONE || "+91 77788 86839";
   return (
     <footer id="contact" className="site-footer">
       <div className="footer-feature">
@@ -124,32 +121,6 @@ export function Footer() {
           <Link className="footer-book" to="/book">
             Find your workspace <ArrowUpRight />
           </Link>
-          <div className="footer-socials">
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram"
-            >
-              <Instagram />
-            </a>
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Facebook"
-            >
-              <Facebook />
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="LinkedIn"
-            >
-              <Linkedin />
-            </a>
-          </div>
         </div>
         <div className="footer-map">
           <iframe

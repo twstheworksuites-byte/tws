@@ -14,7 +14,9 @@ export const bookingCheckInToken = booking => crypto.createHmac('sha256', config
 export async function sendEmail({ to, subject, text, html }) {
   if (process.env.SMTP_HOST) {
     const transporter = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT || 587), secure: Number(process.env.SMTP_PORT) === 465, auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined });
-    return transporter.sendMail({ from: process.env.EMAIL_FROM || 'TWS The Work Suites <bookings@example.com>', to, subject, text, html });
+    const from = process.env.EMAIL_FROM || process.env.SMTP_USER;
+    if (!from) throw Object.assign(new Error('Email sender is not configured.'), { status: 503 });
+    return transporter.sendMail({ from, to, subject, text, html });
   }
   if (config.env !== 'production' && process.env.DEV_EMAIL_CAPTURE === 'true') { console.info(`[DEV EMAIL] ${subject} -> ${to}\n${text}`); return; }
   throw Object.assign(new Error('Email delivery is not configured.'), { status: 503 });
