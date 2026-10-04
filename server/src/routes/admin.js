@@ -1648,7 +1648,7 @@ router.patch(
 );
 router.get("/seats", async (req, res, next) => {
   try {
-    const items = await Seat.find()
+    const items = await Seat.find({ status: { $ne: "inactive" } })
       .populate("workspace")
       .sort({ floor: 1, number: 1 })
       .lean();
