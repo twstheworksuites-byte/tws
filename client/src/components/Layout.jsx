@@ -16,17 +16,18 @@ import {
 import { useApp } from "../context";
 
 const nav = [
-  ["Spaces", "/#spaces"],
-  ["Pricing", "/#pricing"],
+  ["Spaces", "/workspaces"],
+  ["Pricing", "/pricing"],
   ["Gallery", "/gallery"],
-  ["Amenities", "/#amenities"],
-  ["Enquire", "/#enquire"],
+  ["Amenities", "/amenities"],
+  ["Enquire", "/contact"],
 ];
 export function Logo({ light = false }) {
   return (
     <Link
       className={`logo ${light ? "logo-light" : ""}`}
       to="/"
+      onClick={() => window.scrollTo(0, 0)}
       aria-label="TWS — The Work Suites"
     >
       <span className="logo-mark tws-mark">TWS</span>
@@ -66,7 +67,7 @@ export function Header() {
               aria-current={isActive(to) ? "page" : undefined}
               key={label}
               to={to}
-              onClick={() => setOpen(false)}
+              onClick={() => { setOpen(false); window.scrollTo(0, 0); }}
             >
               {label}
             </Link>
@@ -74,7 +75,7 @@ export function Header() {
           <Link
             className="btn btn-dark nav-mobile-cta"
             to="/book"
-            onClick={() => setOpen(false)}
+            onClick={() => { setOpen(false); window.scrollTo(0, 0); }}
           >
             Book or lease <ArrowUpRight size={17} />
           </Link>
@@ -201,7 +202,7 @@ export function Footer() {
                 {phone}
               </a>
             ) : (
-              <Link to="/#enquire">
+              <Link to="/contact">
                 <Phone />
                 Request a call
               </Link>
@@ -212,7 +213,7 @@ export function Footer() {
                 {email}
               </a>
             ) : (
-              <Link to="/#enquire">
+              <Link to="/contact">
                 <Mail />
                 Send an enquiry
               </Link>

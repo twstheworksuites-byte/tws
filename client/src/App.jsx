@@ -1,4 +1,4 @@
-import{useEffect}from'react';
+import{useLayoutEffect}from'react';
 import{Navigate,Route,Routes,useLocation}from'react-router-dom';
 import{PublicLayout,Toasts}from'./components/Layout';
 import AdminLayout from'./components/AdminLayout';
@@ -28,7 +28,7 @@ function RequireAuth({admin=false,children}){
  return children;
 }
 function NotFound(){return <section className="not-found"><span>404</span><h1>This space<br/><em>doesn't exist.</em></h1><a className="btn btn-dark" href="/">Return home</a></section>}
-function ScrollToTop(){const{pathname,search,hash}=useLocation();useEffect(()=>{if(hash){requestAnimationFrame(()=>document.querySelector(hash)?.scrollIntoView({block:'start'}));return}window.scrollTo({top:0,left:0,behavior:'auto'})},[pathname,search,hash]);return null}
+function ScrollToTop(){const{pathname,search,hash}=useLocation();useLayoutEffect(()=>{if('scrollRestoration'in window.history)window.history.scrollRestoration='manual';if(hash){requestAnimationFrame(()=>document.querySelector(hash)?.scrollIntoView({block:'start'}));return}window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0},[pathname,search,hash]);return null}
 
 export default function App(){
  const location=useLocation(),isPortal=location.pathname.startsWith('/customer')||location.pathname.startsWith('/admin');
