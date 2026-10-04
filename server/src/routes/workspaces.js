@@ -12,9 +12,17 @@ router.get('/', async (req, res, next) => {
     if (req.query.floor) query.floor = req.query.floor;
     if (req.query.capacity) query.capacity = { $gte: Number(req.query.capacity) };
     const items = await Workspace.find(query).lean();
+    const seats = await Seat.find({ workspace: { $in: items.map(item => item._id) }, status: { $ne: 'inactive' } }).select('workspace status bookable').lean();
+    const inventory = new Map();
+    for (const seat of seats) {
+      const key = String(seat.workspace), counts = inventory.get(key) || { unitCount: 0, bookableUnitCount: 0 };
+      counts.unitCount += 1;
+      if (seat.status === 'active' && seat.bookable) counts.bookableUnitCount += 1;
+      inventory.set(key, counts);
+    }
     const order = { hot_desk: 0, dedicated_desk: 1, private_cabin: 2, meeting_room: 3, conference_room: 4, phone_booth: 5 };
     items.sort((a, b) => (order[a.type] ?? 99) - (order[b.type] ?? 99) || (a.capacity || 0) - (b.capacity || 0) || a.name.localeCompare(b.name));
-    res.json({ items });
+    res.json({ items: items.map(item => ({ ...item, ...(inventory.get(String(item._id)) || { unitCount: 0, bookableUnitCount: 0 }) })) });
   } catch (error) { next(error); }
 });
 
@@ -43,7 +51,7 @@ router.get('/availability', async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => { try { const item = await Workspace.findById(req.params.id).lean(); if (!item) return res.status(404).json({ message: 'Workspace not found.' }); const seats = await Seat.find({ workspace: item._id }).lean(); res.json({ item, seats }); } catch (e) { next(e); } });
 
-const workspaceInput = z.object({ name: z.string().min(2), slug: z.string().min(2), type: z.enum(['hot_desk','dedicated_desk','private_cabin','meeting_room','conference_room','phone_booth']), floor: z.string(), zone: z.string().optional(), capacity: z.number().int().positive(), description: z.string().optional(), image: z.string().optional(), amenities: z.array(z.string()).default([]), pricing: z.object({ hourly: z.number().nonnegative().optional(), daily: z.number().nonnegative().optional(), weekly: z.number().nonnegative().optional(), monthly: z.number().nonnegative().optional() }), allowedDurations: z.array(z.enum(['hourly','daily','weekly','monthly'])), status: z.enum(['active','maintenance','blocked','inactive']).default('active'), bookable: z.boolean().default(true) });
-router.post('/', authenticate, authorize('super_admin'), validate(workspaceInput), async (req, res, next) => { try { const item=await Workspace.create(req.validated);await audit(req,'workspace.created','Workspace',item._id);req.app.get('io').emit('operations:update',{resource:'workspace',action:'created',id:item._id});res.status(201).json({ item }); } catch(e) { next(e); } });
+const workspaceInput = z.object({ name: z.string().min(2), slug: z.string().min(2), type: z.enum(['hot_desk','dedicated_desk','private_cabin','meeting_room','conference_room','phone_booth']), floor: z.string(), zone: z.string().optional(), capacity: z.number().int().positive().nullable(), description: z.string().optional(), image: z.string().optional(), amenities: z.array(z.string()).default([]), pricing: z.object({ hourly: z.number().nonnegative().optional(), daily: z.number().nonnegative().optional(), weekly: z.number().nonnegative().optional(), monthly: z.number().nonnegative().optional() }), allowedDurations: z.array(z.enum(['hourly','daily','weekly','monthly'])), status: z.enum(['active','maintenance','blocked','inactive']).default('active'), bookable: z.boolean().default(true) });
+router.post('/', authenticate, authorize('super_admin'), validate(workspaceInput), async (req, res, next) => { try { const item=await Workspace.create(req.validated);await audit(req,'workspace.created','Workspace',item._id);req.app.get('io').emit('availability:update',{workspaceId:item._id,reason:'workspace_created'});req.app.get('io').emit('operations:update',{resource:'workspace',action:'created',id:item._id});res.status(201).json({ item }); } catch(e) { next(e); } });
 router.patch('/:id', authenticate, authorize('super_admin'), async (req, res, next) => { try { const item = await Workspace.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });await audit(req,'workspace.updated','Workspace',item?._id,req.body);req.app.get('io').emit('availability:update',{workspaceId:item?._id,reason:'workspace_updated'});req.app.get('io').emit('operations:update',{resource:'workspace',action:'updated',id:item?._id});res.json({ item }); } catch(e) { next(e); } });
 export default router;

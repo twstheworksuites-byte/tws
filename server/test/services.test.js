@@ -17,5 +17,9 @@ test('uses the confirmed four and eight hour meeting-room package prices',()=>{
   assert.deepEqual(calculateQuote(workspace,'hourly','2026-08-25T10:00:00Z','2026-08-25T14:00:00Z'),{base:2156,tax:388.08,discount:0,total:2544.08});
   assert.deepEqual(calculateQuote(workspace,'hourly','2026-08-25T10:00:00Z','2026-08-25T18:00:00Z'),{base:4312,tax:776.16,discount:0,total:5088.16});
 });
+test('updates meeting-room package prices when the admin hourly rate changes',()=>{
+  const workspace={type:'meeting_room',allowedDurations:['hourly'],pricing:{hourly:700}};
+  assert.deepEqual(calculateQuote(workspace,'hourly','2026-08-25T10:00:00Z','2026-08-25T14:00:00Z'),{base:2520,tax:453.6,discount:0,total:2973.6});
+});
 test('hashes and verifies passwords without storing plaintext',()=>{const value=hashValue('StrongPassword123');assert.notEqual(value.hash,'StrongPassword123');assert.equal(verifyHash('StrongPassword123',value.salt,value.hash),true);assert.equal(verifyHash('WrongPassword123',value.salt,value.hash),false);});
 test('verifies Cashfree webhook signatures against the untouched raw body',()=>{const previous=process.env.CASHFREE_SECRET_KEY;process.env.CASHFREE_SECRET_KEY='cashfree-test-secret';const body='{"type":"PAYMENT_SUCCESS_WEBHOOK"}',timestamp='1724567890',signature=crypto.createHmac('sha256',process.env.CASHFREE_SECRET_KEY).update(timestamp+body).digest('base64');assert.equal(verifyCashfreeWebhook(body,timestamp,signature),true);assert.equal(verifyCashfreeWebhook(body+' ',timestamp,signature),false);process.env.CASHFREE_SECRET_KEY=previous;});

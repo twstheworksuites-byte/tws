@@ -64,7 +64,9 @@ export function calculateQuote(workspace, durationType, startAt, endAt) {
   const units = { hourly: hours, daily: Math.ceil(hours / 24), weekly: Math.ceil(hours / 168), monthly: Math.ceil(hours / 720) }[durationType];
   const rate = workspace.pricing?.[durationType];
   if (!rate || units <= 0) throw Object.assign(new Error('Pricing is not configured for this duration.'), { status: 422 });
-  const meetingPackage = workspace.type === 'meeting_room' && durationType === 'hourly' ? ({ 4: 2156, 8: 4312 })[hours] : undefined;
+  const meetingPackage = workspace.type === 'meeting_room' && durationType === 'hourly' && [4, 8].includes(hours)
+    ? Math.floor(rate * hours * 0.9)
+    : undefined;
   const base = meetingPackage ?? Math.round(rate * units * 100) / 100;
   const tax = Math.round(base * config.taxRate * 100) / 100;
   return { base, tax, discount: 0, total: base + tax };

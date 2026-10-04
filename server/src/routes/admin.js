@@ -1429,6 +1429,11 @@ router.put(
         key: item.key,
         published: item.published,
       });
+      req.app.get("io").emit("operations:update", {
+        resource: "content",
+        action: "updated",
+        id: item._id,
+      });
       res.json({ item });
     } catch (e) {
       next(e);
@@ -1731,6 +1736,11 @@ router.post(
         resource: "seat",
         action: "created",
         id: item._id,
+      });
+      req.app.get("io").emit("availability:update", {
+        workspaceId: item.workspace,
+        seatId: item._id,
+        reason: "seat_created",
       });
       res.status(201).json({ item });
     } catch (e) {

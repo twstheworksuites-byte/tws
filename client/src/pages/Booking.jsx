@@ -78,7 +78,7 @@ const cabinUnitCount = (size) => [8, 12].includes(size) ? 2 : 1;
 export default function Booking() {
   const [params] = useSearchParams(),
     navigate = useNavigate(),
-    { user: sessionUser, logout, toast, booking, setBooking } = useApp(),
+    { user: sessionUser, logout, toast, booking, setBooking, operationsVersion } = useApp(),
     customer = sessionUser?.role === "customer",
     user = customer ? sessionUser : null;
   const mode = params.get("mode") === "lease" ? "lease" : "booking";
@@ -155,7 +155,7 @@ export default function Booking() {
         toast(error.message, "error");
       })
       .finally(() => setLoadingSpaces(false));
-  }, [spaceRetry]);
+  }, [spaceRetry, operationsVersion]);
 
   const workspace = workspaces.find((item) => item._id === workspaceId);
   const privateWorkspaces = useMemo(() => workspaces.filter((item) => item.type === "private_cabin"), [workspaces]);

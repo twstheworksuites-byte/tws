@@ -48,3 +48,27 @@ export const cabinInventory = [
   { seats: 8, count: null, price: 79992 },
   { seats: 12, count: null, price: 119988 }
 ];
+
+export function withLivePricing(plan, workspaces = []) {
+  const matches = workspaces.filter(item => item.type === plan.type && item.status === 'active');
+  const workspace = matches[0];
+  if (!workspace) return { ...plan, _id: undefined };
+  const rates = matches.flatMap(item => Object.values(item.pricing || {}).filter(Number));
+  const price = plan.type === 'private_cabin'
+    ? Math.min(...matches.map(item => Number(item.pricing?.monthly || 0) / Number(item.capacity || 1)).filter(Boolean))
+    : Math.min(...rates);
+  const livePrice = Number.isFinite(price) ? price : plan.price;
+  const format = value => `₹${Math.round(value).toLocaleString('en-IN')}`;
+  let features = plan.features;
+  let copy = plan.copy;
+  if (plan.type === 'private_cabin') {
+    features = [3, 4, 6, 8, 12].map(seats => `${seats} seats — ${format(livePrice)} × ${seats} = ${format(livePrice * seats)} + 18% GST`);
+  } else if (plan.type === 'meeting_room') {
+    const count = matches.reduce((sum, item) => sum + Number(item.bookableUnitCount || 0), 0);
+    copy = `${count || 10} meeting rooms are available, with capacity for up to 10 people in each room.`;
+    features = [`Hourly — ${format(livePrice)}`, `Half day — ${format(livePrice)} × 4 = ${format(livePrice * 4)}; 10% off = ${format(Math.floor(livePrice * 4 * .9))}`, `Full day — ${format(livePrice)} × 8 = ${format(livePrice * 8)}; 10% off = ${format(Math.floor(livePrice * 8 * .9))}`];
+  } else if (plan.type === 'conference_room') {
+    features = [`Standalone hourly booking — ${format(livePrice)}`, 'Approximately 20–25 seats', 'Two phone booths included'];
+  }
+  return { ...plan, price: livePrice, features, copy, _id: workspace._id };
+}
