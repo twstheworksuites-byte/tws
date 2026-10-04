@@ -124,6 +124,7 @@ const holdSchema = new Schema(
     startAt: Date,
     endAt: Date,
     durationType: String,
+    requestedCapacity: Number,
     quote: { base: Number, tax: Number, discount: Number, total: Number },
     status: {
       type: String,
@@ -170,6 +171,7 @@ const bookingSchema = new Schema(
     startAt: { type: Date, required: true, index: true },
     endAt: { type: Date, required: true, index: true },
     durationType: String,
+    requestedCapacity: Number,
     amount: Number,
     tax: Number,
     discount: { type: Number, default: 0 },

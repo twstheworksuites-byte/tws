@@ -72,8 +72,7 @@ export default function Checkout() {
       if (checkout.paymentDisabled) {
         setBooking({});
         toast('Booked — TWS will contact you to complete payment');
-        if (checkout.whatsappUrl) window.open(checkout.whatsappUrl, '_blank', 'noopener,noreferrer');
-        return navigate(`/booking-confirmation/${id}`, { replace: true });
+        return navigate(`/booking-confirmation/${id}`, { replace: true, state: { officeWhatsappUrl: checkout.officeWhatsappUrl || checkout.whatsappUrl, customerWhatsappUrl: checkout.customerWhatsappUrl } });
       }
       setPendingBookingId(id);
       setBooking({ ...booking, paymentBookingId: id, quote: { base: checkout.booking.amount, tax: checkout.booking.tax, discount: checkout.booking.discount, total: checkout.booking.total } });

@@ -197,6 +197,15 @@ p{color:var(--muted)}
 .booking-summary li svg,.checkout-summary li svg{color:var(--accent)}
 .price-lines{padding:14px 0;gap:8px;border-color:var(--line)}
 .price-lines span{font-size:10.5px}.price-lines strong{color:var(--green);font-size:14px}
+.cabin-picker{margin-top:14px;padding:18px;border:1px solid var(--line);border-radius:12px;background:#fffdf8;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end}
+.cabin-picker>div:first-child{grid-column:1/-1;display:flex;justify-content:space-between;gap:16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.cabin-picker>div:first-child span,.cabin-picker label{font:600 10px/1.4 'Manrope',sans-serif;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.cabin-picker>div:first-child strong{font-size:13px;color:var(--green)}
+.cabin-picker label{display:flex;flex-direction:column;gap:8px}
+.cabin-picker select{height:48px;border:1px solid var(--line);border-radius:9px;background:#fff;padding:0 12px;color:var(--ink);font:600 13px 'Manrope',sans-serif}
+.cabin-calculation{min-height:48px;padding:9px 12px;border-radius:9px;background:#f1ead8;display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center}
+.cabin-calculation span{font-size:11px;color:var(--muted)}.cabin-calculation strong{color:var(--green);font-size:16px}.cabin-calculation small{grid-column:1/-1;color:var(--muted);font-size:8px}
+.confirmation-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.confirmation-actions .btn{width:100%;font-size:10px;padding:0 12px}.confirmation-note{font-size:10px;color:var(--muted);margin:0 0 18px}
 .summary-help{font-size:8.5px!important;line-height:1.5}
 .payment-panel{border-color:#ded2b9;background:#f3ecd9}
 .checkout-top>span{background:var(--cream);color:var(--green)}
@@ -431,6 +440,7 @@ p{color:var(--muted)}
 .pricing-page .pricing-grid .btn{min-height:52px;margin-top:auto;border-radius:10px}
 @media(max-width:900px){.pricing-page .pricing-grid article{min-height:480px}}
 @media(max-width:640px){
+  .cabin-picker{grid-template-columns:1fr;padding:14px}.cabin-picker>div:first-child{align-items:flex-start;flex-direction:column;gap:4px}.confirmation-actions{grid-template-columns:1fr}
   .pricing-page .pricing-grid{gap:14px}
   .pricing-page .pricing-grid article{min-height:0;padding:24px 20px}
   .pricing-page .pricing-grid article>p{min-height:0}

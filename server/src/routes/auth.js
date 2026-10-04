@@ -9,6 +9,7 @@ import { config } from '../config.js';
 const router = Router();
 const password = z.string().min(6, 'Password must contain at least 6 characters.').max(128);
 const email = z.string().email().transform(value => value.toLowerCase());
+const mobile = z.string().trim().transform(value => value.replace(/[^\d+]/g, '')).refine(value => /^\+?\d{10,15}$/.test(value), 'Enter a valid WhatsApp number.');
 const publicUser = user => {
   const value = user.toObject();
   delete value.passwordHash;
@@ -20,13 +21,13 @@ const publicUser = user => {
 };
 
 router.post('/register', rateLimit({ windowMs: 15 * 60_000, limit: 8, standardHeaders: true, skip:()=>config.env!=='production' }), validate(z.object({
-  name: z.string().trim().min(2).max(80), email, password
+  name: z.string().trim().min(2).max(80), email, mobile, password
 })), async (req, res, next) => {
   try {
     const exists = await User.exists({ email: req.validated.email });
     if (exists) return res.status(409).json({ message: 'An account already exists with this email. Please sign in.' });
     const credentials = hashValue(req.validated.password);
-    const user = await User.create({ name: req.validated.name, email: req.validated.email, passwordHash: credentials.hash, passwordSalt: credentials.salt, emailVerified:true });
+    const user = await User.create({ name: req.validated.name, email: req.validated.email, mobile: req.validated.mobile, passwordHash: credentials.hash, passwordSalt: credentials.salt, emailVerified:true });
     req.app.get('io').emit('operations:update', { resource: 'user', action: 'registered', id: user._id });
     await audit(req, 'auth.register', 'User', user._id);
     await createCustomerNotification(user._id, { title: 'Welcome to The Work Suites', message: 'Your customer account is ready. You can now select workspaces, hold seats and manage bookings from your dashboard.', kind: 'account' });

@@ -7,7 +7,7 @@ import { audit, bookingCheckInToken, bookingReference, calculateQuote, createCus
 import { config } from '../config.js';
 
 const router = Router();
-const periodSchema = z.object({ workspaceId: z.string(), seatId: z.string().optional().nullable(), seatIds: z.array(z.string()).max(64).optional(), startAt: z.coerce.date(), endAt: z.coerce.date(), durationType: z.enum(['hourly','daily','weekly','monthly']) }).refine(d => d.endAt > d.startAt, 'End time must be after start time.');
+const periodSchema = z.object({ workspaceId: z.string(), seatId: z.string().optional().nullable(), seatIds: z.array(z.string()).max(64).optional(), requestedCapacity: z.number().int().refine(value => [3, 4, 6, 8, 12].includes(value)).optional(), startAt: z.coerce.date(), endAt: z.coerce.date(), durationType: z.enum(['hourly','daily','weekly','monthly']) }).refine(d => d.endAt > d.startAt, 'End time must be after start time.');
 const couponQuote=(quote,coupon)=>{const discount=Math.min(quote.base,Math.round((coupon.discountType==='percent'?quote.base*coupon.value/100:coupon.value)*100)/100),base=quote.base,tax=Math.round(Math.max(0,base-discount)*config.taxRate*100)/100,total=Math.round((Math.max(0,base-discount)+tax)*100)/100;return{base,discount,tax,total}};
 async function activeCoupon(code){const now=new Date(),coupon=await Coupon.findOne({code:String(code||'').trim().toUpperCase(),active:true,$and:[{$or:[{startsAt:null},{startsAt:{$exists:false}},{startsAt:{$lte:now}}]},{$or:[{endsAt:null},{endsAt:{$exists:false}},{endsAt:{$gte:now}}]}]});if(!coupon||(coupon.usageLimit>0&&coupon.usedCount>=coupon.usageLimit))throw Object.assign(new Error('This offer code is invalid, expired, or fully used.'),{status:422});return coupon;}
 
@@ -18,16 +18,22 @@ router.post('/quote', validate(periodSchema), async (req, res, next) => {
 router.post('/holds', authenticate, validate(periodSchema), async (req, res, next) => {
   let hold;
   try {
-    const { workspaceId, seatId, seatIds, startAt, endAt, durationType } = req.validated;
+    const { workspaceId, seatId, seatIds, requestedCapacity, startAt, endAt, durationType } = req.validated;
     const selectedSeatIds=[...new Set((seatIds?.length?seatIds:seatId?[seatId]:[]).map(String))];
     if (startAt < new Date()) return res.status(422).json({ message: 'Bookings must start in the future.' });
     const workspace = await Workspace.findById(workspaceId);
     if (!workspace?.bookable || workspace.status !== 'active') return res.status(409).json({ message: 'This workspace is not currently bookable.' });
+    if (workspace.type === 'private_cabin') {
+      const requested = requestedCapacity || workspace.capacity;
+      const sourceCapacity = requested === 8 ? 4 : requested === 12 ? 6 : requested;
+      const requiredUnits = [8, 12].includes(requested) ? 2 : 1;
+      if (sourceCapacity !== workspace.capacity || selectedSeatIds.length < 1 || selectedSeatIds.length > requiredUnits) return res.status(422).json({ message: `Select ${requiredUnits} available cabin unit${requiredUnits > 1 ? 's' : ''} for the ${requested}-seater cabin.` });
+    } else if (requestedCapacity) return res.status(422).json({ message: 'Cabin size is only valid for private cabin bookings.' });
     if (selectedSeatIds.length) { const seats = await Seat.find({ _id:{$in:selectedSeatIds}, workspace: workspaceId,bookable:true,status:'active' }); if(seats.length!==selectedSeatIds.length)return res.status(409).json({ message: 'One or more selected seats are no longer bookable.' }); }
     const conflict = await Maintenance.exists({ workspace: workspaceId, ...(selectedSeatIds.length ? { $or: [{ seat:{$in:selectedSeatIds} }, { seat: null }] } : {}), status: { $in: ['scheduled','active'] }, startAt: { $lt: endAt }, endAt: { $gt: startAt } });
     if (conflict) return res.status(409).json({ message: 'Maintenance is scheduled during that period.' });
     const unitQuote=calculateQuote(workspace,durationType,startAt,endAt),quantity=Math.max(1,selectedSeatIds.length),quote={base:unitQuote.base*quantity,tax:unitQuote.tax*quantity,discount:0,total:unitQuote.total*quantity},expiresAt = new Date(Date.now() + 10 * 60_000);
-    hold = await Hold.create({ owner: req.user._id, workspace: workspaceId, seat: selectedSeatIds[0] || undefined,seats:selectedSeatIds, startAt, endAt, durationType, quote, expiresAt });
+    hold = await Hold.create({ owner: req.user._id, workspace: workspaceId, seat: selectedSeatIds[0] || undefined,seats:selectedSeatIds, requestedCapacity, startAt, endAt, durationType, quote, expiresAt });
     const slots = slotsBetween(startAt, endAt),resourceKeys=selectedSeatIds.length?selectedSeatIds.map(id=>resourceKey(workspaceId,id)):[resourceKey(workspaceId)];
     await ResourceLock.insertMany(resourceKeys.flatMap(key=>slots.map(slotStart => ({ resourceKey: key, slotStart, hold: hold._id, expiresAt }))), { ordered: true });
     req.app.get('io').emit('availability:update', { workspaceId, seatIds:selectedSeatIds, reason: 'hold_created' });
@@ -46,6 +52,8 @@ router.patch('/holds/:id', authenticate, validate(z.object({ seatIds: z.array(z.
     const hold=await Hold.findOne({_id:req.params.id,owner:req.user._id,status:'active',expiresAt:{$gt:new Date()}});
     if(!hold)return res.status(410).json({message:'Your seat hold has expired. Please select again.'});
     const selectedSeatIds=[...new Set(req.validated.seatIds.map(String))];
+    const requiredUnits=[8,12].includes(hold.requestedCapacity)?2:1;
+    if(hold.requestedCapacity&&selectedSeatIds.length>requiredUnits)return res.status(422).json({message:`Select ${requiredUnits} available cabin unit${requiredUnits>1?'s':''} for the ${hold.requestedCapacity}-seater cabin.`});
     const seats=await Seat.find({_id:{$in:selectedSeatIds},workspace:hold.workspace,bookable:true,status:'active'});
     if(seats.length!==selectedSeatIds.length)return res.status(409).json({message:'One or more selected seats are no longer bookable.'});
     const previousIds=(hold.seats?.length?hold.seats:hold.seat?[hold.seat]:[]).map(String),previousSet=new Set(previousIds),nextSet=new Set(selectedSeatIds);
@@ -70,6 +78,7 @@ router.post('/checkout', authenticate, validate(checkoutSchema), async (req, res
   try {
     const hold = await Hold.findOne({ _id: req.validated.holdId, owner: req.user._id, status: 'active', expiresAt: { $gt: new Date() } });
     if (!hold) return res.status(410).json({ message: 'Your hold has expired. Please select the workspace again.' });
+    if ([8, 12].includes(hold.requestedCapacity) && (hold.seats?.length || 0) !== 2) return res.status(422).json({ message: `Select two available cabin units for the ${hold.requestedCapacity}-seater cabin.` });
     const existing = await Booking.findOne({ hold: hold._id });
     if (existing) {
       if (existing.status !== 'pending_payment' || existing.payment.provider !== config.paymentProvider) return res.status(409).json({ message: 'This booking cannot start another payment. Check My Bookings.' });
@@ -78,19 +87,24 @@ router.post('/checkout', authenticate, validate(checkoutSchema), async (req, res
     }
     const coupon=req.validated.couponCode?await activeCoupon(req.validated.couponCode):null,quote=coupon?couponQuote(hold.quote,coupon):hold.quote;
     const reference = bookingReference();
-    const booking = await Booking.create({ bookingId: reference, user: req.user._id, workspace: hold.workspace, seat: hold.seat,seats:hold.seats, hold: hold._id, startAt: hold.startAt, endAt: hold.endAt, durationType: hold.durationType, amount: quote.base, tax: quote.tax, discount: quote.discount, total: quote.total, couponCode:coupon?.code, customer: req.validated.customer, payment: { provider: config.paymentProvider, orderId: config.paymentProvider === 'cashfree' ? reference.replaceAll('-', '_') : undefined, status: 'pending' } });
+    const booking = await Booking.create({ bookingId: reference, user: req.user._id, workspace: hold.workspace, seat: hold.seat,seats:hold.seats, hold: hold._id, requestedCapacity:hold.requestedCapacity, startAt: hold.startAt, endAt: hold.endAt, durationType: hold.durationType, amount: quote.base, tax: quote.tax, discount: quote.discount, total: quote.total, couponCode:coupon?.code, customer: req.validated.customer, payment: { provider: config.paymentProvider, orderId: config.paymentProvider === 'cashfree' ? reference.replaceAll('-', '_') : undefined, status: 'pending' } });
     if(config.paymentProvider==='disabled'){
       const workspace=await Workspace.findById(booking.workspace).lean();
       const {checkInToken}=await finalizeBookingWithoutPayment(booking);
       await User.findByIdAndUpdate(req.user._id,{$set:req.validated.customer});
       const schedule=new Date(booking.startAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',dateStyle:'medium',timeStyle:'short'});
-      const message=encodeURIComponent(`Booked\nBooking: ${booking.bookingId}\nSpace: ${workspace?.name||'TWS workspace'}\nCustomer: ${booking.customer.name}\nMobile: ${booking.customer.mobile}\nSchedule: ${schedule} IST`);
+      const selectedSpace=booking.requestedCapacity?`${booking.requestedCapacity}-Seater Private Cabin`:(workspace?.name||'TWS workspace');
+      const officeMessage=encodeURIComponent(`Booked\nBooking: ${booking.bookingId}\nSpace: ${selectedSpace}\nCustomer: ${booking.customer.name}\nMobile: ${booking.customer.mobile}\nSchedule: ${schedule} IST\nTotal including GST: ₹${Number(booking.total).toLocaleString('en-IN')}`);
+      const customerMessage=encodeURIComponent(`Booked with TWS\nBooking: ${booking.bookingId}\nSpace: ${selectedSpace}\nSchedule: ${schedule} IST\nTotal including GST: ₹${Number(booking.total).toLocaleString('en-IN')}\nTWS will contact you to complete payment.`);
       const officeNumber=String(process.env.BUSINESS_WHATSAPP||process.env.BUSINESS_PHONE||'917778886839').replace(/\D/g,'');
+      const customerDigits=String(booking.customer.mobile||'').replace(/\D/g,'');
+      const customerNumber=customerDigits.length===10?`91${customerDigits}`:customerDigits;
       req.app.get('io').emit('availability:update',{workspaceId:booking.workspace,seatId:booking.seat,reason:'booking_confirmed'});
       req.app.get('io').emit('operations:update',{resource:'booking',action:'confirmed_without_online_payment',id:booking._id});
       await audit(req,'booking.confirmed_without_online_payment','Booking',booking._id,{bookingId:booking.bookingId});
       notifyBooking(booking,'confirmed').catch(error=>console.error('Booking email failed',error.message));
-      return res.status(201).json({booking,checkInToken,whatsappUrl:`https://wa.me/${officeNumber}?text=${message}`,paymentDisabled:true});
+      const officeWhatsappUrl=`https://wa.me/${officeNumber}?text=${officeMessage}`;
+      return res.status(201).json({booking,checkInToken,whatsappUrl:officeWhatsappUrl,officeWhatsappUrl,customerWhatsappUrl:customerNumber?`https://wa.me/${customerNumber}?text=${customerMessage}`:undefined,paymentDisabled:true});
     }
     const paymentOrder = await createPaymentOrder(booking); booking.payment.orderId = paymentOrder.orderId; await booking.save();
     await User.findByIdAndUpdate(req.user._id, { $set: req.validated.customer });

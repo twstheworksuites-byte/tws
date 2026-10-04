@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Phone, ShieldCheck, UserRound } from 'lucide-react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api';
 import { useApp } from '../context';
@@ -65,12 +65,12 @@ export function AdminLogin() {
 }
 
 export function Register() {
-  const [name, setName] = useState(''), [email, setEmail] = useState(''), [password, setPassword] = useState(''), [busy, setBusy] = useState(false);
+  const [name, setName] = useState(''), [email, setEmail] = useState(''), [mobile, setMobile] = useState(''), [password, setPassword] = useState(''), [busy, setBusy] = useState(false);
   const { login, toast } = useApp(), navigate = useNavigate(), location = useLocation();
   async function submit(event) {
     event.preventDefault(); setBusy(true);
     try {
-      const result = await api('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password }) });
+      const result = await api('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, mobile, password }) });
       login(result.token, result.user); toast('Your account is ready');
       navigate(location.state?.from || '/customer', { replace: true });
     } catch (error) { toast(error.message, 'error'); } finally { setBusy(false); }
@@ -81,6 +81,7 @@ export function Register() {
     <form onSubmit={submit} className="auth-form">
       <label>Full name<div className="input-icon"><UserRound /><input required minLength="2" maxLength="80" autoFocus value={name} onChange={event => setName(event.target.value)} autoComplete="name" placeholder="Your full name" /></div></label>
       <label>Email address<div className="input-icon"><Mail /><input type="email" required value={email} onChange={event => setEmail(event.target.value)} autoComplete="email" placeholder="you@company.com" /></div></label>
+      <label>WhatsApp number<div className="input-icon"><Phone /><input type="tel" required minLength="10" maxLength="16" value={mobile} onChange={event => setMobile(event.target.value)} autoComplete="tel" inputMode="tel" placeholder="+91 98765 43210" /></div></label>
       <PasswordField value={password} onChange={event => setPassword(event.target.value)} autoComplete="new-password" />
       <button className="btn btn-dark btn-wide" disabled={busy}>{busy ? 'Creating account…' : 'Create account'} <ArrowRight /></button>
     </form>

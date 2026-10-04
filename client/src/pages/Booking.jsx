@@ -70,6 +70,10 @@ const clockHours = Array.from({ length: 12 }, (_, index) =>
   String(index + 1).padStart(2, "0"),
 );
 const clockMinutes = ["00", "15", "30", "45"];
+const cabinSizes = [3, 4, 6, 8, 12];
+const cabinInventoryText = { 3: "1 available", 4: "13 available", 6: "7 available", 8: "Check live availability", 12: "Check live availability" };
+const cabinSourceCapacity = (size) => size === 8 ? 4 : size === 12 ? 6 : size;
+const cabinUnitCount = (size) => [8, 12].includes(size) ? 2 : 1;
 
 export default function Booking() {
   const [params] = useSearchParams(),
@@ -82,6 +86,10 @@ export default function Booking() {
     [workspaceId, setWorkspaceId] = useState(
       params.get("workspace") || booking.workspace?._id || "",
     ),
+    [cabinSize, setCabinSize] = useState(() => {
+      const value = Number(params.get("cabin") || booking.requestedCapacity);
+      return cabinSizes.includes(value) ? value : 3;
+    }),
     [date, setDate] = useState(() => validBookingDate(booking.date)),
     [start, setStart] = useState(booking.start || "09:00"),
     [duration, setDuration] = useState(booking.duration || "daily"),
@@ -138,6 +146,8 @@ export default function Booking() {
         setWorkspaces(result.items || []);
         if (!workspaceId && result.items?.[0])
           setWorkspaceId(result.items[0]._id);
+        const selected = (result.items || []).find((item) => item._id === workspaceId);
+        if (selected?.type === "private_cabin" && !params.get("cabin") && !booking.requestedCapacity) setCabinSize(selected.capacity || 3);
       })
       .catch((error) => {
         setWorkspaces([]);
@@ -148,6 +158,13 @@ export default function Booking() {
   }, [spaceRetry]);
 
   const workspace = workspaces.find((item) => item._id === workspaceId);
+  const privateWorkspaces = useMemo(() => workspaces.filter((item) => item.type === "private_cabin"), [workspaces]);
+  const spaceOptions = useMemo(() => {
+    const firstCabin = privateWorkspaces[0];
+    return workspaces.filter((item) => item.type !== "private_cabin").flatMap((item) => item.type === "meeting_room" && firstCabin ? [firstCabin, item] : [item]);
+  }, [workspaces, privateWorkspaces]);
+  const requestedUnits = workspace?.type === "private_cabin" ? cabinUnitCount(cabinSize) : 1;
+  const displayWorkspaceName = workspace?.type === "private_cabin" ? `${cabinSize}-Seater Private Cabin` : workspace?.name;
   const selectedTime = timeParts(start);
   const changeTime = (key, value) => {
     resetSelection();
@@ -196,7 +213,7 @@ export default function Booking() {
   const hasRequiredSelection =
     Boolean(workspaceId) &&
     period.startAt.getTime() > Date.now() &&
-    (!workspaceSeats.length || selectedSeats.length > 0);
+    (!workspaceSeats.length || (workspace?.type === "private_cabin" ? selectedSeats.length === requestedUnits : selectedSeats.length > 0));
   const canContinue =
     hasRequiredSelection &&
     (customer
@@ -278,12 +295,23 @@ export default function Booking() {
     setSelectedSeats([]);
   }
 
+  function chooseCabinSize(size) {
+    const source = privateWorkspaces.find((item) => item.capacity === cabinSourceCapacity(size));
+    if (!source) return toast("That cabin size is temporarily unavailable.", "error");
+    resetSelection();
+    setCabinSize(size);
+    setWorkspaceId(source._id);
+  }
+
   async function toggleSeat(seat) {
     if (locking) return;
     const exists = selectedSeats.some(
         (item) => String(item._id) === String(seat._id),
-      ),
-      next = exists
+      );
+    if (!exists && workspace?.type === "private_cabin" && selectedSeats.length >= requestedUnits) {
+      return toast(`Select exactly ${requestedUnits} available cabin unit${requestedUnits > 1 ? "s" : ""} for this option.`, "error");
+    }
+    const next = exists
         ? selectedSeats.filter((item) => String(item._id) !== String(seat._id))
         : [...selectedSeats, seat];
     if (!customer) {
@@ -317,6 +345,7 @@ export default function Booking() {
               startAt: period.startAt,
               endAt: period.endAt,
               durationType: duration,
+              requestedCapacity: workspace?.type === "private_cabin" ? cabinSize : undefined,
             }),
           });
       holdRef.current = result.hold;
@@ -341,10 +370,13 @@ export default function Booking() {
         "That space is no longer available for this time. Choose another one.",
         "error",
       );
+    if (workspaceSeats.length && workspace?.type === "private_cabin" && selectedSeats.length !== requestedUnits)
+      return toast(`Select exactly ${requestedUnits} available cabin unit${requestedUnits > 1 ? "s" : ""} for the ${cabinSize}-seater cabin.`, "error");
     if (workspaceSeats.length && !selectedSeats.length)
       return toast("Select at least one available seat", "error");
     const draft = {
-      workspace,
+      workspace: workspace?.type === "private_cabin" ? { ...workspace, name: displayWorkspaceName, capacity: cabinSize } : workspace,
+      requestedCapacity: workspace?.type === "private_cabin" ? cabinSize : undefined,
       seats: selectedSeats,
       seat: selectedSeats[0] || null,
       date,
@@ -372,6 +404,7 @@ export default function Booking() {
               startAt: period.startAt,
               endAt: period.endAt,
               durationType: duration,
+              requestedCapacity: workspace?.type === "private_cabin" ? cabinSize : undefined,
             }),
           });
       setBooking({
@@ -382,7 +415,7 @@ export default function Booking() {
         pending: false,
       });
       toast(
-        `${selectedSeats.length > 1 ? `${selectedSeats.length} seats` : selectedSeats[0]?.number || workspace.name} held for 10 minutes`,
+        `${workspace?.type === "private_cabin" ? displayWorkspaceName : selectedSeats.length > 1 ? `${selectedSeats.length} seats` : selectedSeats[0]?.number || workspace.name} held for 10 minutes`,
       );
       preserveHoldRef.current = true;
       navigate("/checkout");
@@ -478,43 +511,46 @@ export default function Booking() {
                 </div>
               ) : (
                 <div className="type-options">
-                  {workspaces.map((item) => {
+                  {spaceOptions.map((item) => {
+                    const isCabin = item.type === "private_cabin";
+                    const optionWorkspace = isCabin ? privateWorkspaces.find((space) => space.capacity === cabinSourceCapacity(cabinSize)) || item : item;
                     const state =
-                        availabilityByWorkspace.get(String(item._id)) ||
+                        availabilityByWorkspace.get(String(optionWorkspace._id)) ||
                         "available",
-                      capacity = item.capacity ? `${item.capacity} seats` : 'Desk count confirmed by TWS';
+                      capacity = isCabin ? "3, 4, 6, 8 or 12 seats" : item.capacity ? `${item.capacity} seats` : 'Desk count confirmed by TWS',
+                      active = isCabin ? workspace?.type === "private_cabin" : workspaceId === item._id;
                     return (
                       <button
                         key={item._id}
                         onClick={() => {
-                          if (workspaceId !== item._id) resetSelection();
-                          setWorkspaceId(item._id);
+                          if (workspaceId !== optionWorkspace._id) resetSelection();
+                          setWorkspaceId(optionWorkspace._id);
                         }}
                         disabled={
-                          state !== "available" && workspaceId !== item._id
+                          state !== "available" && !active
                         }
-                        className={`${workspaceId === item._id ? "active " : ""}availability-${state}`}
+                        className={`${active ? "active " : ""}availability-${state}`}
                       >
                         <span>
-                          {labels[item.type]}{" "}
+                          <span>{labels[item.type]}</span>{" "}
                           <em className={`space-state ${state}`}>{state}</em>
                         </span>
                         <small>
-                          {item.name} · {capacity}
+                          {isCabin ? "Private Cabin" : item.name} · {capacity}
                         </small>
                         <b>
-                          from{" "}
-                          {money(
-                            Math.min(
-                              ...Object.values(item.pricing).filter(Boolean),
-                            ),
-                          )}
+                          {isCabin ? "₹9,999 / desk / month" : <>from {money(Math.min(...Object.values(item.pricing).filter(Boolean)))}</>}
                         </b>
                       </button>
                     );
                   })}
                 </div>
               )}
+              {workspace?.type === "private_cabin" && <div className="cabin-picker">
+                <div><span>Available cabin options</span><strong>₹9,999 / desk / month</strong></div>
+                <label>Cabin size<select value={cabinSize} onChange={(event) => chooseCabinSize(Number(event.target.value))}>{cabinSizes.map((size) => <option value={size} key={size}>{size}-seater · {cabinInventoryText[size]}</option>)}</select></label>
+                <div className="cabin-calculation"><span>{money(9999)} × {cabinSize} desks</span><strong>{money(9999 * cabinSize)}</strong><small>GST (18%) is added in your booking summary.</small></div>
+              </div>}
             </div>
           </div>
           <div className="booking-block">
@@ -624,14 +660,14 @@ export default function Booking() {
               <div className="map-wrap">
                 <div className="map-heading">
                   <div>
-                    <h2>{['private_cabin','meeting_room'].includes(workspace?.type)?'Select one or more available units':'Select one or more seats'}</h2>
+                    <h2>{workspace?.type === 'private_cabin' ? `Choose ${requestedUnits} available cabin unit${requestedUnits > 1 ? 's' : ''}` : workspace?.type === 'meeting_room' ? 'Select an available room' : 'Select one or more seats'}</h2>
                     <p>
                       {
                         workspaceSeats.filter(
                           (item) => item.availability === "available",
                         ).length
                       }{" "}
-                      free · {selectedSeats.length} selected
+                      free · {selectedSeats.length} of {workspace?.type === 'private_cabin' ? requestedUnits : 1} selected
                       {locking
                         ? " · locking…"
                         : selectionHold
@@ -659,7 +695,7 @@ export default function Booking() {
             <span>LIVE AVAILABILITY</span>
           </div>
           <p className="eyebrow">Your selection</p>
-          <h2>{workspace?.name || "Choose a workspace"}</h2>
+          <h2>{displayWorkspaceName || "Choose a workspace"}</h2>
           <span className={`summary-availability ${workspaceAvailability}`}>
             {workspaceAvailability} for selected time
           </span>
@@ -685,14 +721,14 @@ export default function Booking() {
             {selectedSeats.length > 0 && (
               <li>
                 <Users />
-                {selectedSeats.length} seat{selectedSeats.length > 1 ? "s" : ""}
+                {workspace?.type === 'private_cabin' ? `${cabinSize}-seat cabin` : `${selectedSeats.length} seat${selectedSeats.length > 1 ? "s" : ""}`}
                 : {selectedSeats.map((item) => item.number).join(", ")}
               </li>
             )}
           </ul>
           <div className="price-lines">
             <span>
-              Workspace{quantity > 1 ? ` × ${quantity}` : ""}{" "}
+              {workspace?.type === 'private_cabin' ? `${money(9999)} × ${cabinSize} desks` : `Workspace${quantity > 1 ? ` × ${quantity}` : ""}`} {" "}
               <b>{money(effectiveQuote?.base)}</b>
             </span>
             <span>

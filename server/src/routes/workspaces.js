@@ -11,7 +11,9 @@ router.get('/', async (req, res, next) => {
     if (req.query.type) query.type = req.query.type;
     if (req.query.floor) query.floor = req.query.floor;
     if (req.query.capacity) query.capacity = { $gte: Number(req.query.capacity) };
-    const items = await Workspace.find(query).sort({ floor: 1, type: 1, name: 1 }).lean();
+    const items = await Workspace.find(query).lean();
+    const order = { hot_desk: 0, dedicated_desk: 1, private_cabin: 2, meeting_room: 3, conference_room: 4, phone_booth: 5 };
+    items.sort((a, b) => (order[a.type] ?? 99) - (order[b.type] ?? 99) || (a.capacity || 0) - (b.capacity || 0) || a.name.localeCompare(b.name));
     res.json({ items });
   } catch (error) { next(error); }
 });
