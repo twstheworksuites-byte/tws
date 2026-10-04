@@ -437,3 +437,16 @@ p{color:var(--muted)}
   .pricing-page .plan-rates{margin:19px 0 13px}
   .pricing-page .pricing-grid ul{margin-bottom:20px}
 }
+
+/* Keep the mobile admin drawer above its backdrop and fully usable. */
+@media(max-width:900px){
+  .admin-layout .portal-backdrop{z-index:105;background:rgba(10,12,15,.58);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+  .admin-layout .admin-sidebar{z-index:110!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+  .admin-layout .admin-sidebar nav{flex:1;min-height:0;padding-right:3px;overflow-y:auto!important}
+  .admin-layout .admin-sidebar .portal-close{z-index:2;border:1px solid rgba(232,200,117,.35);background:#242725;color:#fff}
+  .admin-layout.nav-open .admin-menu{opacity:0;pointer-events:none}
+  .admin-layout .admin-user{flex:0 0 auto;margin-top:14px}
+  .admin-layout .portal-powered{flex:0 0 auto}
+}
+
+.public-enquiry-modal>header h2{color:#fff}
