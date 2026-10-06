@@ -9,7 +9,7 @@ import { useApp } from '../context';
 const localDateTime=date=>{const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(date||Date.now())).filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));return`${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`};
 const localDate=date=>localDateTime(date).slice(0,10);
 const indiaIso=value=>new Date(`${value}:00+05:30`).toISOString();
-const blankWorkspace = { name:'', slug:'', type:'private_cabin', zone:'', capacity:1, description:'', image:'/images/tws-private-cabin.webp', amenities:'Reception & seating area,Pantry,Coffee machine,Vending machine,Printing station,Male washroom,Female washroom,8-person lift,Puja space,Ground-floor parking', allowedDurations:'hourly,daily,monthly', hourly:0, daily:0, weekly:'', monthly:0, status:'active', bookable:true };
+const blankWorkspace = { name:'', slug:'', type:'private_cabin', zone:'', capacity:1, description:'', image:'/images/tws-private-cabin.webp', amenities:'Reception & seating area,Pantry,Coffee machine,Vending machine,Printing station,Male washroom,Female washroom,8-person lift,Ground-floor parking', allowedDurations:'hourly,daily,monthly', hourly:0, daily:0, weekly:'', monthly:0, status:'active', bookable:true };
 const bookingSeats=booking=>(booking?.seats?.length?booking.seats:booking?.seat?[booking.seat]:[]).map(item=>item.number).filter(Boolean).join(', ');
 
 function Modal({ title, copy, onClose, children }) {

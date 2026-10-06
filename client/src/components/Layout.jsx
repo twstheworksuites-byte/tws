@@ -14,7 +14,6 @@ import { useApp } from "../context";
 
 const nav = [
   ["Spaces", "/workspaces"],
-  ["Pricing", "/pricing"],
   ["Gallery", "/gallery"],
   ["Amenities", "/amenities"],
   ["Enquire", "/contact"],
@@ -144,7 +143,6 @@ export function Footer() {
           <Link to="/about">About us</Link>
           <Link to="/workspaces">Workspaces</Link>
           <Link to="/seating-plans">Seating plans</Link>
-          <Link to="/pricing">Pricing</Link>
         </div>
         <div>
           <span>Experience</span>

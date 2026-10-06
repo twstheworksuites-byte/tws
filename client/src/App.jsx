@@ -13,7 +13,7 @@ import{CustomerDashboard,Invoices,MyBookings,Notifications,Profile}from'./pages/
 import{AdminBookings,AdminMap,CancellationRequests,Dashboard,Reports,ResourceList}from'./pages/Admin';
 import SupportWidget from'./components/SupportWidget';
 import InfoPage from'./pages/Info';
-import{Contact,Pricing}from'./pages/Marketing';
+import{Contact}from'./pages/Marketing';
 import{About,Amenities,Gallery,SeatingPlans}from'./pages/Discover';
 import BookingConfirmation from'./pages/BookingConfirmation';
 import AdminBusiness from'./pages/AdminBusiness';
@@ -34,7 +34,7 @@ export default function App(){
  const location=useLocation(),isPortal=location.pathname.startsWith('/customer')||location.pathname.startsWith('/admin');
  return <><ScrollToTop/><Routes>
   <Route element={<PublicLayout/>}>
-   <Route index element={<Home/>}/><Route path="home" element={<Home/>}/><Route path="about" element={<About/>}/><Route path="workspaces" element={<Workspaces/>}/><Route path="seating-plans" element={<SeatingPlans/>}/><Route path="pricing" element={<Pricing/>}/><Route path="get-space" element={<Navigate to="/book" replace/>}/><Route path="lease" element={<Navigate to="/book?mode=lease" replace/>}/><Route path="amenities" element={<Amenities/>}/><Route path="gallery" element={<Gallery/>}/><Route path="contact" element={<Contact/>}/><Route path="book" element={<Booking/>}/>
+   <Route index element={<Home/>}/><Route path="home" element={<Home/>}/><Route path="about" element={<About/>}/><Route path="workspaces" element={<Workspaces/>}/><Route path="seating-plans" element={<SeatingPlans/>}/><Route path="get-space" element={<Navigate to="/book" replace/>}/><Route path="lease" element={<Navigate to="/book?mode=lease" replace/>}/><Route path="amenities" element={<Amenities/>}/><Route path="gallery" element={<Gallery/>}/><Route path="contact" element={<Contact/>}/><Route path="book" element={<Booking/>}/>
    <Route path="checkout" element={<RequireAuth><Checkout/></RequireAuth>}/><Route path="booking-confirmation/:id" element={<RequireAuth><BookingConfirmation/></RequireAuth>}/>
    <Route path="login" element={<Login/>}/><Route path="register" element={<Register/>}/><Route path="forgot-password" element={<ForgotPassword/>}/><Route path="reset-password" element={<ResetPassword/>}/>
    <Route path="faq" element={<InfoPage type="faq"/>}/><Route path="privacy" element={<InfoPage type="privacy"/>}/><Route path="terms" element={<InfoPage type="terms"/>}/><Route path="*" element={<NotFound/>}/>

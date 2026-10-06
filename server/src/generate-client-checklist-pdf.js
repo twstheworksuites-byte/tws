@@ -158,7 +158,7 @@ item('Printing station');
 item('Male and female washrooms');
 item('Lift access and accessibility facilities');
 item('Ground-floor parking: car and two-wheeler capacity');
-item('Puja space, housekeeping and on-site support');
+item('Housekeeping and on-site support');
 item('Any other facility customers should know about');
 
 section(7, 'Photos, videos and brand files', 'Please send original files without WhatsApp compression where possible.');
