@@ -3,7 +3,6 @@ import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Phone, ShieldCheck, UserRou
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api';
 import { useApp } from '../context';
-import { BrandLogo } from '../components/Layout';
 
 function PasswordField({ value, onChange, autoComplete = 'current-password' }) {
   const [visible, setVisible] = useState(false);
@@ -95,5 +94,5 @@ export function ForgotPassword(){const[email,setEmail]=useState(''),[sent,setSen
 export function ResetPassword(){const[params]=useSearchParams(),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[done,setDone]=useState(false),{toast}=useApp();async function submit(event){event.preventDefault();setBusy(true);try{await api('/auth/reset-password',{method:'POST',body:JSON.stringify({email:params.get('email'),token:params.get('token'),password})});setDone(true);toast('Password updated')}catch(error){toast(error.message,'error')}finally{setBusy(false)}}return <AuthShell><p className="eyebrow">Secure reset</p><h1>Choose a new <em>password.</em></h1>{done?<><p>Your password has been changed successfully.</p><Link className="btn btn-dark" to="/login">Sign in</Link></>:<form className="auth-form" onSubmit={submit}><PasswordField value={password} onChange={event=>setPassword(event.target.value)} autoComplete="new-password"/><button className="btn btn-dark btn-wide" disabled={busy}>{busy?'Updating…':'Update password'}<ArrowRight/></button></form>}</AuthShell>}
 
 function AuthShell({ children, admin = false }) {
-  return <section className={`auth-page ${admin ? 'admin-auth' : ''}`}><div className="auth-visual auth-spatial-art" aria-hidden="true"><i/><i/><i/><BrandLogo className="auth-brand-logo"/><div><span>{admin ? 'OPERATIONS · SECURE ACCESS' : 'CUSTOMER PORTAL'}</span><p>{admin ? '“One clear view of every space, booking, and customer.”' : '“Your space. Your pace.”'}</p></div></div><div className="auth-panel">{children}</div></section>;
+  return <section className={`auth-page ${admin ? 'admin-auth' : ''}`}><div className="auth-visual auth-spatial-art" aria-hidden="true"><i/><i/><i/><div><span>{admin ? 'OPERATIONS · SECURE ACCESS' : 'CUSTOMER PORTAL'}</span><p>{admin ? '“One clear view of every space, booking, and customer.”' : '“Your space. Your pace.”'}</p></div></div><div className="auth-panel">{children}</div></section>;
 }

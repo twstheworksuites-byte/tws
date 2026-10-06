@@ -113,7 +113,6 @@ export function Footer() {
     <footer id="contact" className="site-footer">
       <div className="footer-feature">
         <div className="footer-intro">
-          <Logo light />
           <p>
             Private cabins and professional meeting spaces for individuals,
             teams and growing businesses in South Bengaluru.
