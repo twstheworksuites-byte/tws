@@ -74,6 +74,9 @@ const cabinSizes = [3, 4, 6, 8, 12];
 const cabinInventoryText = { 3: "1 available", 4: "13 available", 6: "7 available", 8: "Check live availability", 12: "Check live availability" };
 const cabinSourceCapacity = (size) => size === 8 ? 4 : size === 12 ? 6 : size;
 const cabinUnitCount = (size) => [8, 12].includes(size) ? 2 : 1;
+const bookingFallbacks = {hot_desk:'/images/workspace-flexi.webp',dedicated_desk:'/images/workspace-dedicated.webp',private_cabin:'/images/cabin-three.png',meeting_room:'/images/workspace-meeting.webp',conference_room:'/images/tws-conference-01.webp'};
+const cabinImages = {3:'/images/cabin-three.png',4:'/images/cabin-four.png',6:'/images/cabin-six.png',8:'/images/cabin-eight.webp',12:'/images/cabin-twelve.webp'};
+const bookingImageFor = (item,cabinSize) => cabinSize ? cabinImages[cabinSize] : item?.image || bookingFallbacks[item?.type] || '/images/tws-foyer-01.webp';
 
 export default function Booking() {
   const [params] = useSearchParams(),
@@ -428,7 +431,7 @@ export default function Booking() {
   }
 
   return (
-    <section className="booking-page">
+    <section className={`booking-page ${customer ? "customer-booking-page" : ""}`}>
       <div className="booking-top">
         <Link to={customer ? "/customer" : "/workspaces"}>
           <ArrowLeft /> {customer ? "Back to dashboard" : "Back to spaces"}
@@ -531,16 +534,14 @@ export default function Booking() {
                         }
                         className={`${active ? "active " : ""}availability-${state}`}
                       >
-                        <span>
-                          <span>{labels[item.type]}</span>{" "}
-                          <em className={`space-state ${state}`}>{state}</em>
+                        <img className="type-option-image" src={bookingImageFor(optionWorkspace,isCabin?cabinSize:null)} alt=""/>
+                        <span className="type-option-copy"><span>
+                            <span>{labels[item.type]}</span>{" "}
+                            <em className={`space-state ${state}`}>{state}</em>
+                          </span>
+                          <small>{isCabin ? `${cabinSize}-Seater Private Cabin` : item.name} · {capacity}</small>
+                          <b>{isCabin ? "₹9,999 / desk / month" : <>from {money(Math.min(...Object.values(item.pricing).filter(Boolean)))}</>}</b>
                         </span>
-                        <small>
-                          {isCabin ? "Private Cabin" : item.name} · {capacity}
-                        </small>
-                        <b>
-                          {isCabin ? "₹9,999 / desk / month" : <>from {money(Math.min(...Object.values(item.pricing).filter(Boolean)))}</>}
-                        </b>
                       </button>
                     );
                   })}
@@ -682,6 +683,7 @@ export default function Booking() {
                   selected={selectedIds}
                   onSelect={toggleSeat}
                   kind={workspace?.type}
+                  capacity={workspace?.type==='private_cabin'?cabinSize:workspace?.capacity}
                 />
               </div>
             </div>

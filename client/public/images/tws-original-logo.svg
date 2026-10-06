@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" role="img" aria-labelledby="title desc">
+  <title id="title">TWS — The Work Suites</title>
+  <desc id="desc">Your space, your pace</desc>
+  <g fill="none" fill-rule="evenodd">
+    <g transform="translate(28 34)">
+      <text x="0" y="128" fill="#e96500" font-family="DejaVu Sans" font-size="126" font-weight="400" letter-spacing="10">TWS</text>
+      <path d="M380 0v145" stroke="#d85d13" stroke-width="2"/>
+      <g fill="#101114" font-family="DejaVu Sans" font-size="27" font-weight="600" letter-spacing="12">
+        <text x="422" y="34">THE</text>
+        <text x="422" y="83">WORK</text>
+        <text x="422" y="132">SUITES</text>
+      </g>
+      <g transform="translate(18 190)">
+        <rect x="0" y="0" width="48" height="2" fill="#d85d13"/>
+        <rect x="622" y="0" width="48" height="2" fill="#d85d13"/>
+        <text x="76" y="9" fill="#101114" font-family="DejaVu Sans" font-size="22" font-weight="600" letter-spacing="8">YOUR SPACE</text>
+        <circle cx="335" cy="1" r="4" fill="#e96500"/>
+        <text x="363" y="9" fill="#101114" font-family="DejaVu Sans" font-size="22" font-weight="600" letter-spacing="8">YOUR PACE</text>
+      </g>
+    </g>
+  </g>
+</svg>

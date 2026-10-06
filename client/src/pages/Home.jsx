@@ -3,7 +3,7 @@ import{Link,useLocation}from'react-router-dom';
 import{motion}from'framer-motion';
 import{ArrowRight,Building2,Check,ChevronDown,Clock3,Coffee,MapPin,Monitor,Phone,ShieldCheck,Users,Wifi,X,Zap}from'lucide-react';
 import{api,money}from'../api';
-import{Empty,Loading}from'../components/Layout';
+import{BrandLogo,Empty,Loading}from'../components/Layout';
 import{WorkspaceCard}from'../components/WorkspaceCard';
 import{useApp}from'../context';
 import{useSiteContent}from'../siteContent';
@@ -47,7 +47,7 @@ export default function Home(){
 
   <section className="home-enquiry" id="enquire"><div className="enquiry-shell"><motion.div className="enquiry-copy" {...reveal}><p className="eyebrow">Plan a free visit</p><h2>Tell us what<br/><em>you need.</em></h2><p>Share your requirements. Our Bengaluru team will help you choose the right space.</p><div><span><MapPin/> Bannerghatta Main Road · Kothnur, Kalena Agrahara</span><span><Clock3/> Visit timing is confirmed during your callback</span></div></motion.div><EnquiryForm form={form} set={set} enquire={enquire} busy={busy} sent={sent}/></div></section>
 
-  {showEnquiry&&<div className="modal-backdrop public-enquiry-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setShowEnquiry(false)}}><section className="public-enquiry-modal"><header><div><span>TWS</span><div><p>Free site visit</p><h2>Find the right workspace.</h2><small>Send your details and our team will call you.</small></div></div><button onClick={()=>setShowEnquiry(false)} aria-label="Close enquiry form"><X/></button></header><EnquiryForm form={form} set={set} enquire={enquire} busy={busy} compact/></section></div>}
+  {showEnquiry&&<div className="modal-backdrop public-enquiry-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setShowEnquiry(false)}}><section className="public-enquiry-modal"><header><div><BrandLogo className="enquiry-brand-logo"/><div><p>Free site visit</p><h2>Find the right workspace.</h2><small>Send your details and our team will call you.</small></div></div><button onClick={()=>setShowEnquiry(false)} aria-label="Close enquiry form"><X/></button></header><EnquiryForm form={form} set={set} enquire={enquire} busy={busy} compact/></section></div>}
   {priceItem&&<div className="modal-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setPriceItem(null)}}><section className="price-detail-modal"><button className="modal-close" onClick={()=>setPriceItem(null)} aria-label="Close price details"><X/></button><span className="eyebrow">{typeLabel(priceItem.type)}</span><h2>{priceItem.name}</h2><p>{priceItem.description}</p><div className="price-detail-list">{Object.entries(priceItem.pricing||{}).filter(([unit,value])=>value&&priceItem.allowedDurations?.includes(unit)).map(([unit,value])=><div key={unit}><span>Per {unitLabel(unit)}</span><strong>{money(value)}</strong></div>)}</div><h3>Included</h3><div className="price-amenities">{(priceItem.amenities||[]).map(item=><span key={item}><Check/>{item}</span>)}</div><Link className="btn btn-accent" to={`/book?workspace=${priceItem._id}`}>Check available seats <ArrowRight/></Link></section></div>}
  </div>
 }

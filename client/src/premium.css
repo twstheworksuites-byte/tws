@@ -463,3 +463,141 @@ p{color:var(--muted)}
 }
 
 .public-enquiry-modal>header h2{color:#fff}
+
+/* One official TWS logo across public, enquiry, authentication and portal surfaces. */
+.logo{
+  flex:0 0 auto;
+  padding:4px 8px;
+  border:1px solid rgba(212,169,79,.28);
+  border-radius:7px;
+  background:#fffdf8;
+  box-shadow:0 5px 16px rgba(0,0,0,.12);
+}
+.brand-logo-image{display:block;width:158px;height:52px;object-fit:contain}
+.site-footer .logo .brand-logo-image{width:190px;height:66px}
+.admin-sidebar .logo,.customer-sidebar .logo{align-self:flex-start;margin-right:42px}
+.admin-sidebar .logo .brand-logo-image,.customer-sidebar .logo .brand-logo-image{width:164px;height:57px}
+.enquiry-brand-logo{width:112px;height:45px;padding:4px 7px;border-radius:6px;background:#fffdf8;object-fit:contain}
+.auth-brand-logo{position:absolute;left:50%;top:31%;z-index:2;width:min(58%,460px);height:auto;padding:12px 16px;border-radius:10px;background:#fffdf8;box-shadow:0 22px 65px rgba(0,0,0,.3);transform:translate(-50%,-50%)}
+.contact-brand-logo{position:relative;z-index:2;width:min(55%,300px);padding:12px 16px;border-radius:10px;background:#fffdf8;box-shadow:0 20px 55px rgba(0,0,0,.3)}
+.loader-brand-logo{position:relative;z-index:2;width:min(78vw,410px);height:auto;padding:16px 22px;border:1px solid rgba(232,200,117,.42);border-radius:10px;background:#fffdf8;box-shadow:0 22px 70px rgba(0,0,0,.35)}
+
+/* Architectural page accent replaces the three-dot ornament. */
+.page-hero:before,.page-hero:after{content:"";position:absolute;pointer-events:none;border-radius:0;background:transparent;box-shadow:none}
+.page-hero:after{right:6%;top:30px;width:128px;height:70px;border-top:1px solid rgba(172,124,49,.62);border-right:1px solid rgba(172,124,49,.62);transform:skewX(-12deg)}
+.page-hero:before{right:calc(6% + 24px);top:43px;width:87px;height:44px;border-top:1px solid rgba(172,124,49,.24);border-right:1px solid rgba(172,124,49,.24);transform:skewX(-12deg)}
+
+/* Amenities receive staggered motion, a subtle light sweep and tactile hover depth. */
+section.amenity-grid article{position:relative;overflow:hidden;isolation:isolate;transition:border-color .32s ease,box-shadow .32s ease,background .32s ease}
+section.amenity-grid article:before{content:"";position:absolute;left:0;top:0;width:3px;height:0;background:linear-gradient(180deg,var(--accent),var(--accent2));transition:height .38s cubic-bezier(.16,1,.3,1)}
+section.amenity-grid article:after{content:"";position:absolute;z-index:-1;right:-80px;bottom:-95px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(212,169,79,.18),transparent 68%);opacity:0;transform:scale(.65);transition:opacity .38s ease,transform .55s cubic-bezier(.16,1,.3,1)}
+section.amenity-grid article svg{transition:transform .38s cubic-bezier(.16,1,.3,1),filter .38s ease,color .3s ease;animation:amenity-icon-float 4.2s ease-in-out infinite}
+section.amenity-grid article:nth-child(2n) svg{animation-delay:-1.4s}
+section.amenity-grid article:nth-child(3n) svg{animation-delay:-2.8s}
+section.amenity-grid article>span{transition:color .3s ease,transform .3s ease}
+@media(hover:hover){
+  section.amenity-grid article:hover{border-color:rgba(212,169,79,.58);background:#fff;box-shadow:0 22px 52px rgba(35,29,21,.11)}
+  section.amenity-grid article:hover:before{height:100%}
+  section.amenity-grid article:hover:after{opacity:1;transform:scale(1)}
+  section.amenity-grid article:hover svg{color:#bb7925;filter:drop-shadow(0 9px 15px rgba(212,169,79,.25));transform:translateY(-5px) rotate(-5deg) scale(1.1)}
+  section.amenity-grid article:hover>span{color:#a16e27;transform:translateX(4px)}
+}
+@keyframes amenity-icon-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+@media(max-width:700px){
+  .site-header .logo{padding:3px 5px}
+  .site-header .logo .brand-logo-image{width:108px;height:42px}
+  .page-hero:after{right:18px;top:20px;width:72px;height:44px}
+  .page-hero:before{right:32px;top:29px;width:48px;height:27px}
+  .enquiry-brand-logo{width:88px;height:38px}
+}
+@media(prefers-reduced-motion:reduce){section.amenity-grid article svg{animation:none}}
+
+/* Booking choices reuse the same photography as the public workspace catalogue. */
+.type-options button{padding:0!important;overflow:hidden;display:grid;grid-template-columns:112px minmax(0,1fr);min-height:132px}
+.type-option-image{width:112px;height:100%;min-height:132px;object-fit:cover}
+.type-option-copy{min-width:0;display:flex!important;flex-direction:column;align-items:stretch!important;justify-content:center!important;padding:15px;text-align:left}
+.type-option-copy>span{display:flex;align-items:flex-start;justify-content:space-between;gap:7px}
+.type-option-copy>small{margin:7px 0 12px;line-height:1.35}
+.type-options button.active{padding:0!important;box-shadow:inset 0 0 0 2px var(--accent),0 8px 22px rgba(212,169,79,.12)}
+.type-options button.active .type-option-image{filter:saturate(1.06) contrast(1.02)}
+
+/* Customer booking progress remains visible throughout selection and checkout. */
+.customer-booking-page .booking-top,.checkout-top{position:sticky;top:0;z-index:28;box-shadow:0 8px 24px rgba(23,24,22,.08)}
+
+/* BookMyShow-inspired compact seat map: front marker, small seat cells and a bottom legend. */
+.seat-map>.legend{display:none}
+.map-front{display:none}
+.unit-chair-row{display:grid;grid-template-columns:repeat(4,6px);justify-content:center;gap:3px;margin-bottom:9px}
+.unit-chair-row b{display:block;width:6px;height:6px;border:1px solid currentColor;border-radius:2px 2px 1px 1px;opacity:.72}
+
+/* Seating-plan and contact cards receive restrained architectural motion. */
+.plan-space{position:relative;overflow:hidden;transition:border-color .3s ease,box-shadow .3s ease,background .3s ease}
+.plan-space:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.075) 48%,transparent 70%);transform:translateX(-120%);transition:transform .7s cubic-bezier(.16,1,.3,1)}
+.plan-space:hover{border-color:rgba(232,200,117,.5);box-shadow:0 18px 38px rgba(3,21,18,.2)}
+.plan-space:hover:before{transform:translateX(120%)}
+.contact-details article{position:relative;overflow:hidden;animation:contact-card-rise .62s both cubic-bezier(.16,1,.3,1);transition:transform .32s cubic-bezier(.16,1,.3,1),box-shadow .32s,border-color .32s}
+.contact-details article:nth-child(2){animation-delay:.07s}.contact-details article:nth-child(3){animation-delay:.14s}.contact-details article:nth-child(4){animation-delay:.21s}
+.contact-details article:after{content:"";position:absolute;right:-38px;top:-38px;width:88px;height:88px;border:1px solid rgba(212,169,79,.2);border-radius:50%;transition:transform .42s ease,border-color .3s}
+.contact-details article svg{transition:transform .35s cubic-bezier(.16,1,.3,1),color .3s}
+@media(hover:hover){
+ .contact-details article:hover{z-index:1;border-color:rgba(212,169,79,.55);box-shadow:0 18px 44px rgba(39,31,21,.1);transform:translateY(-7px)}
+ .contact-details article:hover:after{border-color:rgba(212,169,79,.5);transform:scale(1.35)}
+ .contact-details article:hover svg{color:#ae7428;transform:translateY(-4px) rotate(-5deg) scale(1.08)}
+}
+@keyframes contact-card-rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:640px){
+ .type-options button{grid-template-columns:88px minmax(0,1fr);min-height:112px}
+ .type-option-image{width:88px;min-height:112px}
+ .type-option-copy{padding:11px 10px}
+ .type-option-copy>small{margin:5px 0 9px}
+ .map-heading>.legend{display:none}
+ .seat-map{margin-inline:0;padding:18px 12px 15px;border-radius:12px;background:#fffdf8;color:var(--ink);border:1px solid #ded6c9;box-shadow:0 14px 35px rgba(33,27,19,.08)}
+ .seat-map .map-label{padding-bottom:12px;border-color:#e3dccf;color:#9b7138;text-align:right;font-size:7px}
+ .seat-map .seat-grid{grid-template-columns:repeat(auto-fit,minmax(34px,1fr));gap:7px;margin:18px 0 28px}
+ .seat-map.unit-map .seat-grid{grid-template-columns:repeat(3,minmax(76px,1fr))}
+ .seat-map .seat{min-height:34px;aspect-ratio:1.12;border-radius:5px;border:1px solid #66ae82;background:#fff;color:#297548;box-shadow:none}
+ .seat-map.unit-map .seat{min-height:82px;aspect-ratio:auto;padding:10px 6px}
+ .seat-map .seat span{font-size:8px;line-height:1.15}
+ .seat-map .seat.selected{border-color:#19ad49;background:#19ad49;color:#fff}
+ .seat-map .seat.held{border-color:#e5b84d;background:#fff8df;color:#9a6b00}
+ .seat-map .seat.booked,.seat-map .seat.maintenance,.seat-map .seat.blocked{border-color:#d8d8d5;background:#e8e8e6;color:#8a8a86}
+ .seat-map .map-front{display:grid;place-items:center;gap:7px;margin:3px auto 30px;color:#77736b;font-size:8px;text-transform:uppercase;letter-spacing:.1em}
+ .map-front i{display:block;width:min(78%,300px);height:14px;border:1px solid #b7d8e7;border-radius:3px 3px 50% 50%;background:linear-gradient(#eaf8ff,#dff2fa);box-shadow:0 4px 0 #edf6f8}
+ .seat-map>.legend{display:flex;justify-content:center;gap:13px;padding-top:13px;border-top:1px solid #e8e1d7}
+ .seat-map>.legend span{color:#5d5b56;font-size:8px}
+ .seat-map>.legend i{width:12px;height:12px;border:1px solid #66ae82;background:#fff}
+ .seat-map>.legend i.selected{border-color:#19ad49;background:#19ad49}
+ .seat-map>.legend i.held{border-color:#e5b84d;background:#fff8df}
+ .seat-map>.legend i.booked{border-color:#ddd;background:#e8e8e6}
+ .seat-map .map-support{display:none}
+ .unit-chair-row{grid-template-columns:repeat(4,5px);gap:2px}
+ .unit-chair-row b{width:5px;height:5px}
+}
+@media(max-width:400px){
+ .type-options{grid-template-columns:1fr}
+ .seat-map.unit-map .seat-grid{grid-template-columns:repeat(2,minmax(92px,1fr))}
+ .seat-map>.legend{gap:8px;justify-content:space-between}
+}
+@media(prefers-reduced-motion:reduce){.contact-details article{animation:none}.plan-space:before{display:none}}
+
+/* Final phone-width guardrails: keep the brand, actions and hero inside the viewport. */
+@media(max-width:560px){
+ .site-header,.site-header .nav-shell{width:100%;max-width:100%}
+ .site-header .nav-shell{display:flex!important;grid-template-columns:none!important;justify-content:flex-start!important;gap:6px!important;padding-inline:10px!important;overflow:visible}
+ .site-header .logo{width:98px;max-width:98px;flex:0 0 98px!important;padding:3px 4px}
+ .site-header .logo .brand-logo-image{width:88px;height:36px}
+ .site-header .nav-actions{position:static!important;min-width:0!important;margin-left:auto!important;transform:none!important}
+ .site-header .login-link{width:auto!important;min-width:58px!important;padding-inline:10px!important}
+ .simple-hero,.simple-hero-copy,.simple-hero-copy>*{min-width:0;max-width:100%}
+ .simple-hero-copy{overflow:hidden;padding-inline:16px}
+ .simple-hero h1{max-width:350px;font-size:clamp(40px,11.8vw,50px);line-height:.94;overflow-wrap:break-word}
+ .simple-hero-copy>p,.simple-hero-actions{width:100%;max-width:100%}
+ .simple-hero-actions .btn{max-width:100%;padding-inline:12px;white-space:normal;text-align:center}
+}
+@media(max-width:360px){
+ .site-header .logo{width:88px;max-width:88px;flex-basis:88px!important}
+ .site-header .logo .brand-logo-image{width:78px;height:34px}
+ .site-header .login-link{min-width:54px!important;padding-inline:8px!important}
+}

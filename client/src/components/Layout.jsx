@@ -13,11 +13,15 @@ import {
 import { useApp } from "../context";
 
 const nav = [
+  ["Home", "/"],
   ["Spaces", "/workspaces"],
   ["Gallery", "/gallery"],
   ["Amenities", "/amenities"],
   ["Enquire", "/contact"],
 ];
+export function BrandLogo({ className = "" }) {
+  return <img className={`brand-logo-image ${className}`.trim()} src="/images/tws-original-logo.svg" alt="TWS — The Work Suites. Your space, your pace." />;
+}
 export function Logo({ light = false }) {
   return (
     <Link
@@ -26,10 +30,7 @@ export function Logo({ light = false }) {
       onClick={() => window.scrollTo(0, 0)}
       aria-label="TWS — The Work Suites"
     >
-      <span className="logo-mark tws-mark">TWS</span>
-      <span>
-        THE WORK SUITES<small>YOUR SPACE · YOUR PACE</small>
-      </span>
+      <BrandLogo />
     </Link>
   );
 }
