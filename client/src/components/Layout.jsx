@@ -208,9 +208,16 @@ export function Footer() {
   );
 }
 export function PublicLayout() {
+  const location = useLocation();
+  const { user, authReady } = useApp();
+  const bookingFlow =
+    location.pathname === "/book" ||
+      location.pathname === "/checkout" ||
+      location.pathname.startsWith("/booking-confirmation/");
+  const customerBookingFlow = bookingFlow && (!authReady || user?.role === "customer");
   return (
     <>
-      <Header />
+      {!customerBookingFlow && <Header />}
       <main>
         <PageMotion />
       </main>

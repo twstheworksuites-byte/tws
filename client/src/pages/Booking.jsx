@@ -430,8 +430,8 @@ export default function Booking() {
   return (
     <section className="booking-page">
       <div className="booking-top">
-        <Link to="/workspaces">
-          <ArrowLeft /> Back to spaces
+        <Link to={customer ? "/customer" : "/workspaces"}>
+          <ArrowLeft /> {customer ? "Back to dashboard" : "Back to spaces"}
         </Link>
         <div className="stepper">
           <span className="active">
@@ -453,7 +453,7 @@ export default function Booking() {
       <div className={`booking-shell ${mode === "lease" ? "lease-mode" : ""}`}>
         <div className="booking-main">
           <div className="booking-heading">
-            <p className="eyebrow">Choose before signing in</p>
+            <p className="eyebrow">{customer ? "Customer booking" : "Choose before signing in"}</p>
             <h1>
               Build your <em>workday.</em>
             </h1>
