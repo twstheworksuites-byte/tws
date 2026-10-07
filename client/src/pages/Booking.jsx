@@ -17,7 +17,7 @@ import { useApp } from "../context";
 import { SeatMap, StatusLegend } from "../components/SeatMap";
 import { Loading } from "../components/Layout";
 import LeaseBookingPanel from "../components/LeaseBookingPanel";
-import { workspaceImageFor } from "../components/WorkspaceCard";
+import { cabinImageByCapacity, workspaceImageFor } from "../components/WorkspaceCard";
 
 const labels = {
   hot_desk: "Hot desk",
@@ -75,8 +75,7 @@ const cabinSizes = [3, 4, 6, 8, 12];
 const cabinInventoryText = { 3: "1 available", 4: "13 available", 6: "7 available", 8: "Check live availability", 12: "Check live availability" };
 const cabinSourceCapacity = (size) => size === 8 ? 4 : size === 12 ? 6 : size;
 const cabinUnitCount = (size) => [8, 12].includes(size) ? 2 : 1;
-const cabinImages = {3:'/images/cabin-three.png',4:'/images/cabin-four.png',6:'/images/cabin-six.png',8:'/images/cabin-eight.webp',12:'/images/cabin-twelve.webp'};
-const bookingImageFor = (item,cabinSize) => workspaceImageFor([8,12].includes(cabinSize)?{...item,image:cabinImages[cabinSize]}:item);
+const bookingImageFor = (item,cabinSize) => item?.type==='private_cabin'&&cabinImageByCapacity[cabinSize]?cabinImageByCapacity[cabinSize]:workspaceImageFor(item);
 
 export default function Booking() {
   const [params] = useSearchParams(),

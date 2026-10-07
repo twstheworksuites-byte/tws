@@ -15,7 +15,7 @@ const withCombinedPrivateCabins=items=>{
   ...source,
   _id:`${source._id}-combined-private-cabins`,
   bookingWorkspaceId:source._id,
-  name:'3, 4, 6, 9, 12 Seater Cabins',
+  name:'3, 4, 6, 8, 12 Seater Cabins',
   description:'Dedicated private cabins with 24/7 access.',
   capacity:3,
   pricing:{monthly:9999},
