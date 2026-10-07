@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -37,6 +37,22 @@ export function Logo({ light = false }) {
 export function Header() {
   const [open, setOpen] = useState(false),
     location = useLocation();
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname, location.search, location.hash]);
+  useEffect(() => {
+    if (!open) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
   const isActive = (to) => {
     const [pathWithSearch, hash] = to.split("#"),
       [path, search] = pathWithSearch.split("?");
@@ -89,8 +105,9 @@ export function Header() {
             Book or lease <ArrowUpRight size={17} />
           </Link>
           <button
+            type="button"
             className="menu-btn"
-            onClick={() => setOpen(!open)}
+            onClick={() => setOpen((value) => !value)}
             aria-label={open ? "Close navigation" : "Open navigation"}
             aria-expanded={open}
             aria-controls="public-navigation"
