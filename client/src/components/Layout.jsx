@@ -14,7 +14,7 @@ import { useApp } from "../context";
 
 const nav = [
   ["Home", "/"],
-  ["Spaces", "/workspaces"],
+  ["Spaces & prices", "/workspaces"],
   ["Gallery", "/gallery"],
   ["Amenities", "/amenities"],
   ["Enquire", "/contact"],
