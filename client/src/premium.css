@@ -626,3 +626,61 @@ section.amenity-grid article>span{transition:color .3s ease,transform .3s ease}
  .contact-map-art{height:175px;border-radius:14px}
  .contact-brand-logo{width:min(78%,300px)}
 }
+
+/* Full white brand lockup in the dark public navbar. */
+.site-header .logo{
+ width:170px;max-width:170px;height:58px;flex:0 0 170px!important;
+ display:flex;align-items:center;padding:0;border:0;background:transparent;box-shadow:none;overflow:visible;
+}
+.site-header .logo:before{display:none}
+.site-header .logo .brand-logo-image{
+ display:block;width:164px;max-width:164px;height:58px;object-fit:contain;
+ filter:brightness(0) invert(1);
+}
+
+/* Responsive booking layout from small phones through portrait tablets. */
+@media(max-width:900px){
+ .booking-shell,.checkout-shell{display:flex;flex-direction:column;gap:28px;padding:38px clamp(16px,4vw,28px) 80px}
+ .booking-flow{order:1}.booking-summary,.checkout-summary{position:relative;top:auto;order:2;width:100%;max-width:620px;margin-inline:auto}
+}
+@media(max-width:700px){
+ .site-header .logo{width:132px;max-width:132px;height:50px;flex-basis:132px!important}
+ .site-header .logo .brand-logo-image{width:128px;max-width:128px;height:50px}
+ .booking-heading h1,.checkout-shell h1{font-size:clamp(34px,10vw,43px);line-height:.96}
+ .booking-heading>p:last-child{max-width:38rem;font-size:13px;line-height:1.5}
+ .booking-block{display:block;width:100%;padding:27px 0}
+ .booking-block h2{margin-bottom:16px;font-size:20px}
+ .type-options{grid-template-columns:1fr!important;gap:10px}
+ .type-options button{grid-template-columns:clamp(88px,27vw,112px) minmax(0,1fr);width:100%;min-height:112px}
+ .type-option-image{width:100%;height:100%;min-height:112px}
+ .type-option-copy{padding:12px 13px}
+ .type-option-copy>span{gap:8px}
+ .type-option-copy>small{margin:6px 0 9px}
+ .cabin-picker{grid-template-columns:1fr;padding:14px}
+ .cabin-picker>div:first-child{align-items:flex-start;flex-direction:column;gap:5px}
+ .seat-map.unit-map .seat-grid{grid-template-columns:repeat(2,minmax(88px,1fr))}
+}
+@media(max-width:480px){
+ .booking-top,.checkout-top{height:56px;padding-inline:12px}
+ .booking-top>a,.checkout-top>a,.secure-note{font-size:0}
+ .booking-top>a svg,.checkout-top>a svg,.secure-note svg{width:17px}
+ .stepper{gap:5px}.stepper i{width:12px}.stepper span{gap:4px;font-size:0}.stepper b{width:21px;height:21px;font-size:8px}
+ .booking-shell,.checkout-shell{gap:22px;padding:28px 12px 64px}
+ .booking-mode-switch{padding:6px}.booking-mode-switch>a{min-height:68px;padding:10px}
+ .booking-mode-switch>a>svg:first-child{width:38px;height:38px;padding:9px}
+ .booking-mode-switch strong{font-size:12px}.booking-mode-switch small{font-size:9px}
+ .date-fields{grid-template-columns:1fr}
+ .date-fields label:first-child{grid-column:auto}
+ .seat-map{padding:15px 10px}
+ .seat-map .seat-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .seat-map>.legend{gap:7px;justify-content:space-between}
+ .summary-image{height:140px}
+}
+@media(max-width:360px){
+ .site-header .logo{width:108px;max-width:108px;flex-basis:108px!important}
+ .site-header .logo .brand-logo-image{width:104px;max-width:104px;height:44px}
+ .site-header .nav-shell{gap:4px!important;padding-inline:8px!important}
+ .site-header .login-link{min-width:50px!important;padding-inline:7px!important}
+ .type-options button{grid-template-columns:82px minmax(0,1fr)}
+ .type-option-copy{padding:10px}
+}
