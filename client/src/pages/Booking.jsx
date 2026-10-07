@@ -550,6 +550,7 @@ export default function Booking() {
                 <div><span>Available cabin options</span><strong>₹9,999 / desk / month</strong></div>
                 <label>Cabin size<select value={cabinSize} onChange={(event) => chooseCabinSize(Number(event.target.value))}>{cabinSizes.map((size) => <option value={size} key={size}>{size}-seater · {cabinInventoryText[size]}</option>)}</select></label>
                 <div className="cabin-calculation"><span>{money(9999)} × {cabinSize} desks</span><strong>{money(9999 * cabinSize)}</strong><small>GST (18%) is added in your booking summary.</small></div>
+                <p className="cabin-member-benefit"><Clock3/>Private cabin members receive 4 complimentary meeting-room hours every month.</p>
               </div>}
             </div>
           </div>
