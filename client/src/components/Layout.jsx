@@ -19,8 +19,8 @@ const nav = [
   ["Amenities", "/amenities"],
   ["Enquire", "/contact"],
 ];
-export function BrandLogo({ className = "" }) {
-  return <img className={`brand-logo-image ${className}`.trim()} src="/images/tws-original-logo.svg" alt="TWS — The Work Suites. Your space, your pace." />;
+export function BrandLogo({ className = "", navbar = false }) {
+  return <img className={`brand-logo-image ${className}`.trim()} src={navbar ? "/images/tws-navbar-logo.svg" : "/images/tws-original-logo.svg"} alt="TWS — The Work Suites. Your space, your pace." />;
 }
 export function Logo({ light = false }) {
   return (
@@ -30,7 +30,7 @@ export function Logo({ light = false }) {
       onClick={() => window.scrollTo(0, 0)}
       aria-label="TWS — The Work Suites"
     >
-      <BrandLogo />
+      <BrandLogo navbar />
     </Link>
   );
 }

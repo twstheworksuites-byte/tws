@@ -635,7 +635,6 @@ section.amenity-grid article>span{transition:color .3s ease,transform .3s ease}
 .site-header .logo:before{display:none}
 .site-header .logo .brand-logo-image{
  display:block;width:164px;max-width:164px;height:58px;object-fit:contain;
- filter:brightness(0) invert(1);
 }
 
 /* Responsive booking layout from small phones through portrait tablets. */
