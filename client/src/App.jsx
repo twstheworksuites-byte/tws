@@ -1,4 +1,4 @@
-import{useLayoutEffect}from'react';
+import{useCallback,useLayoutEffect,useState}from'react';
 import{Navigate,Route,Routes,useLocation}from'react-router-dom';
 import{PublicLayout,Toasts}from'./components/Layout';
 import AdminLayout from'./components/AdminLayout';
@@ -18,6 +18,7 @@ import{About,Amenities,Gallery,SeatingPlans}from'./pages/Discover';
 import BookingConfirmation from'./pages/BookingConfirmation';
 import AdminBusiness from'./pages/AdminBusiness';
 import AdminLeases from'./pages/AdminLeases';
+import Entrance from'./pages/Entrance';
 
 function RequireAuth({admin=false,children}){
  const{user,authReady}=useApp(),location=useLocation();
@@ -32,6 +33,8 @@ function ScrollToTop(){const{pathname,search,hash}=useLocation();useLayoutEffect
 
 export default function App(){
  const location=useLocation(),isPortal=location.pathname.startsWith('/customer')||location.pathname.startsWith('/admin');
+ const[showIntro,setShowIntro]=useState(()=>location.pathname==='/');
+ const finishIntro=useCallback(()=>setShowIntro(false),[]);
  return <><ScrollToTop/><Routes>
   <Route element={<PublicLayout/>}>
    <Route index element={<Home/>}/><Route path="home" element={<Home/>}/><Route path="about" element={<About/>}/><Route path="workspaces" element={<Workspaces/>}/><Route path="seating-plans" element={<SeatingPlans/>}/><Route path="get-space" element={<Navigate to="/book" replace/>}/><Route path="lease" element={<Navigate to="/book?mode=lease" replace/>}/><Route path="amenities" element={<Amenities/>}/><Route path="gallery" element={<Gallery/>}/><Route path="contact" element={<Contact/>}/><Route path="book" element={<Booking/>}/>
@@ -42,5 +45,5 @@ export default function App(){
   <Route path="customer" element={<RequireAuth><CustomerLayout/></RequireAuth>}><Route index element={<CustomerDashboard/>}/><Route path="bookings" element={<MyBookings/>}/><Route path="profile" element={<Profile/>}/><Route path="invoices" element={<Invoices/>}/><Route path="notifications" element={<Notifications/>}/><Route path="*" element={<Navigate to="/customer" replace/>}/></Route>
   <Route path="admin/login" element={<AdminLogin/>}/>
   <Route path="admin" element={<RequireAuth admin><AdminLayout/></RequireAuth>}><Route index element={<Dashboard/>}/><Route path="map" element={<AdminMap/>}/><Route path="bookings" element={<AdminBookings/>}/><Route path="leases" element={<AdminLeases/>}/><Route path="cancellations" element={<CancellationRequests/>}/><Route path="maintenance" element={<Navigate to="/admin/workspaces" replace/>}/><Route path="workspaces" element={<ResourceList kind="workspaces"/>}/><Route path="reports" element={<Reports/>}/><Route path="business" element={<AdminBusiness/>}/><Route path="*" element={<Navigate to="/admin" replace/>}/></Route>
- </Routes><Toasts/>{!isPortal&&<SupportWidget/>}</>;
+ </Routes><Toasts/>{!isPortal&&<SupportWidget/>}{showIntro&&<Entrance onComplete={finishIntro}/>}</>;
 }
