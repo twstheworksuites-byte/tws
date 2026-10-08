@@ -770,3 +770,10 @@ section.amenity-grid article>span{transition:color .3s ease,transform .3s ease}
 }
 
 @media(min-width:1051px){.home-space-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}}
+
+/* Keep the automatic enquiry above the sticky navigation on every screen. */
+.public-enquiry-backdrop{z-index:1000!important;background:rgba(5,8,8,.94)!important}
+@media(max-width:640px){
+ .public-enquiry-backdrop{inset:0!important;padding:8px!important;align-items:center!important}
+ .public-enquiry-modal{width:100%!important;max-height:calc(100dvh - 16px)!important}
+}
