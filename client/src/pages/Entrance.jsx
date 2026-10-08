@@ -25,7 +25,7 @@ export default function Entrance({onComplete}){
  return <div className={`site-intro site-intro-${phase}`} role="dialog" aria-label="TWS introduction">
   <video
    className="site-intro-video"
-   src="/videos/tws-intro.mp4"
+   src="/videos/tws-intro.mp4?v=2"
    autoPlay
    muted
    playsInline
