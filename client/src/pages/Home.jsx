@@ -20,7 +20,7 @@ const homeAmenityItems=[[Wifi,'Workspace connectivity'],[Zap,'Power backup'],[Ph
 const featuredWorkspaces=items=>{
  const cabin=items.find(item=>item.type==='private_cabin'&&Number(item.capacity)===3)||items.find(item=>item.type==='private_cabin');
  const privateCabin=cabin?{...cabin,name:'Private Cabin',description:'3, 4, 6, 8 and 12-seater options with 24/7 access and 4 complimentary meeting-room hours every month.',bookingWorkspaceId:cabin._id,capacity:3,pricing:{monthly:9999},catalogCabinGroup:true}:null;
- return[items.find(item=>item.type==='hot_desk'),items.find(item=>item.type==='dedicated_desk'),privateCabin,items.find(item=>item.type==='meeting_room')].filter(Boolean);
+ return[items.find(item=>item.type==='hot_desk'),items.find(item=>item.type==='dedicated_desk'),privateCabin,items.find(item=>item.type==='meeting_room'),items.find(item=>item.type==='conference_room')].filter(Boolean);
 };
 
 export default function Home(){
@@ -37,7 +37,7 @@ export default function Home(){
 
   <motion.section className="home-intro home-section" {...reveal}><div><p className="eyebrow">The Work Suites</p><h2>Everything you need,<br/><em>without the confusion.</em></h2></div><div><p>Private cabins are available in 3, 4, 6, 8 and 12-seater options. Private cabin members receive 4 complimentary meeting-room hours every month. Every workspace includes two phone booths, connectivity, ground-floor parking and complimentary coffee from the vending machine.</p><Link className="text-link" to="/about">Learn more about TWS <ArrowRight/></Link></div></motion.section>
 
-  <section className="home-spaces home-section" id="spaces"><motion.header className="home-section-head" {...reveal}><div><p className="eyebrow">Choose your space</p><h2>One place. <em>Many ways to work.</em></h2></div><Link className="text-link" to="/workspaces">See spaces & prices <ArrowRight/></Link></motion.header>{loading?<Loading cards={4}/>:homeSpaces.length?<div className="home-space-grid">{homeSpaces.map((item,index)=><WorkspaceCard item={item} index={index} key={item._id}/>)}</div>:<Empty title="Workspaces are being prepared"/>}</section>
+  <section className="home-spaces home-section" id="spaces"><motion.header className="home-section-head" {...reveal}><div><p className="eyebrow">Choose your space</p><h2>One place. <em>Many ways to work.</em></h2></div><Link className="text-link" to="/workspaces">See spaces & prices <ArrowRight/></Link></motion.header>{loading?<Loading cards={5}/>:homeSpaces.length?<div className="home-space-grid">{homeSpaces.map((item,index)=><WorkspaceCard item={item} index={index} key={item._id}/>)}</div>:<Empty title="Workspaces are being prepared"/>}</section>
 
   <section className="easy-steps home-section" id="how-it-works"><motion.header className="home-section-head" {...reveal}><div><p className="eyebrow">How it works</p><h2>Book in <em>three easy steps.</em></h2></div></motion.header><div className="step-cards"><motion.article {...reveal}><span>01</span><h3>Choose a space</h3><p>Compare the room size, amenities and current price.</p></motion.article><motion.article {...reveal}><span>02</span><h3>Choose your plan</h3><p>Select an available cabin or room, or request a longer lease.</p></motion.article><motion.article {...reveal}><span>03</span><h3>Confirm with TWS</h3><p>Online payment is disabled. The TWS team confirms your booking directly.</p></motion.article></div></section>
 
