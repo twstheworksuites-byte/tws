@@ -121,8 +121,7 @@ export function Header() {
 }
 export function Footer() {
   const address =
-      import.meta.env.VITE_BUSINESS_ADDRESS ||
-      "Bannerghatta Main Road, Kothnur, Kalena Agrahara, Bengaluru, Karnataka 560083",
+      "Bannerghatta Main Road, Gottigere, Beside Carmel Academy ICSE School, Kothnur, Kalena Agrahara, Bengaluru, Karnataka 560083",
     hours = import.meta.env.VITE_BUSINESS_HOURS,
     email = import.meta.env.VITE_BUSINESS_EMAIL,
     phone = import.meta.env.VITE_BUSINESS_PHONE || "+91 77788 86839";
@@ -141,12 +140,12 @@ export function Footer() {
         <div className="footer-map">
           <iframe
             title="The Work Suites location on Google Maps"
-            src="https://www.google.com/maps?q=Carmel%20Academy%20ICSE%20School%20Kalena%20Agrahara%20Bengaluru%20560083&output=embed"
+            src="https://www.google.com/maps?q=Bannerghatta%20Main%20Road%20Gottigere%20Carmel%20Academy%20ICSE%20School%20Bengaluru%20560083&output=embed"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />
           <a
-            href="https://www.google.com/maps/search/?api=1&query=Carmel+Academy+ICSE+School+Kalena+Agrahara+Bengaluru+560083"
+            href="https://www.google.com/maps/search/?api=1&query=Bannerghatta+Main+Road+Gottigere+Carmel+Academy+ICSE+School+Kothnur+Kalena+Agrahara+Bengaluru+560083"
             target="_blank"
             rel="noreferrer"
           >
@@ -172,8 +171,6 @@ export function Footer() {
           <span>Visit</span>
           <p>
             {address}
-            <br />
-            Beside Carmel Academy ICSE School
             {hours ? (
               <>
                 <br />

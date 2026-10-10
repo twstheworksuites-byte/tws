@@ -652,12 +652,12 @@ section.amenity-grid article>span{transition:color .3s ease,transform .3s ease}
 
 /* Full white brand lockup in the dark public navbar. */
 .site-header .logo{
- width:170px;max-width:170px;height:58px;flex:0 0 170px!important;
+ width:180px;max-width:180px;height:62px;flex:0 0 180px!important;
  display:flex;align-items:center;padding:0;border:0;background:transparent;box-shadow:none;overflow:visible;
 }
 .site-header .logo:before{display:none}
 .site-header .logo .brand-logo-image{
- display:block;width:164px;max-width:164px;height:58px;object-fit:contain;
+ display:block;width:174px;max-width:174px;height:62px;object-fit:contain;
 }
 
 /* Responsive booking layout from small phones through portrait tablets. */
@@ -666,8 +666,8 @@ section.amenity-grid article>span{transition:color .3s ease,transform .3s ease}
  .booking-flow{order:1}.booking-summary,.checkout-summary{position:relative;top:auto;order:2;width:100%;max-width:620px;margin-inline:auto}
 }
 @media(max-width:700px){
- .site-header .logo{width:132px;max-width:132px;height:50px;flex-basis:132px!important}
- .site-header .logo .brand-logo-image{width:128px;max-width:128px;height:50px}
+ .site-header .logo{width:140px;max-width:140px;height:52px;flex-basis:140px!important}
+ .site-header .logo .brand-logo-image{width:136px;max-width:136px;height:52px}
  .booking-heading h1,.checkout-shell h1{font-size:clamp(34px,10vw,43px);line-height:.96}
  .booking-heading>p:last-child{max-width:38rem;font-size:13px;line-height:1.5}
  .booking-block{display:block;width:100%;padding:27px 0}
@@ -699,8 +699,8 @@ section.amenity-grid article>span{transition:color .3s ease,transform .3s ease}
  .summary-image{height:140px}
 }
 @media(max-width:360px){
- .site-header .logo{width:108px;max-width:108px;flex-basis:108px!important}
- .site-header .logo .brand-logo-image{width:104px;max-width:104px;height:44px}
+ .site-header .logo{width:112px;max-width:112px;flex-basis:112px!important}
+ .site-header .logo .brand-logo-image{width:108px;max-width:108px;height:46px}
  .site-header .nav-shell{gap:4px!important;padding-inline:8px!important}
  .site-header .login-link{min-width:50px!important;padding-inline:7px!important}
  .type-options button{grid-template-columns:82px minmax(0,1fr)}

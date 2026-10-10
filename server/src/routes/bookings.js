@@ -189,7 +189,7 @@ router.get('/invoices/:id/pdf', authenticate, async (req, res, next) => {
     label('Workspace', margin, 320); value(`${workspace.name || 'Workspace booking'}${booking.seats?.length?` · Seats ${booking.seats.map(item=>item.number).join(', ')}`:''}`, margin, 336, 220);
     label('Schedule', margin + 265, 320); value(`${dateText(booking.startAt)}\nto ${dateText(booking.endAt)}`, margin + 265, 336, 235);
     label('Booking type', margin, 382); value(String(booking.durationType || 'workspace').replaceAll('_', ' '), margin, 398, 220);
-    label('Location', margin + 265, 382); value('Bannerghatta Main Road, Kothnur, Kalena Agrahara, Bengaluru 560083', margin + 265, 398, 235);
+    label('Location', margin + 265, 382); value('Bannerghatta Main Road, Gottigere, beside Carmel Academy ICSE School, Kothnur, Kalena Agrahara, Bengaluru, Karnataka 560083', margin + 265, 398, 235);
 
     const tableY = 455;
     doc.roundedRect(margin, tableY, contentWidth, 42, 8).fill(green);
@@ -214,7 +214,7 @@ router.get('/invoices/:id/pdf', authenticate, async (req, res, next) => {
     doc.font('Helvetica-Bold').fontSize(8).fillColor(green).text('THANK YOU FOR CHOOSING TWS', margin + 18, 708, { characterSpacing: .7 });
     doc.font('Helvetica').fontSize(8).fillColor(muted).text('This is a computer-generated invoice. Keep it with your booking confirmation and QR check-in pass.', margin + 18, 725, { width: contentWidth - 36 });
     const invoiceContact=[process.env.BUSINESS_PHONE,process.env.BUSINESS_EMAIL].filter(Boolean).join(' · ');
-    doc.fontSize(7).fillColor('#7f8b87').text(`THE WORK SUITES · Bannerghatta Main Road, Bengaluru 560083${invoiceContact?` · ${invoiceContact}`:''}`, margin, 793, { width: contentWidth, align: 'center', characterSpacing: .35 });
+    doc.fontSize(7).fillColor('#7f8b87').text(`THE WORK SUITES · Bannerghatta Main Road, Gottigere, Bengaluru 560083${invoiceContact?` · ${invoiceContact}`:''}`, margin, 793, { width: contentWidth, align: 'center', characterSpacing: .35 });
     doc.end();
   } catch (e) { next(e); }
 });

@@ -151,7 +151,7 @@ item('Lease approval process and expected response time');
 
 section(6, 'Amenities and facilities', 'Please tick every facility that is actually available.');
 item('Reception and visitor seating');
-item('Wi-Fi and power backup');
+item('Wi-Fi and 24/7 power backup');
 item('Two phone booths — included amenity, not separately booked or paid');
 item('Pantry, pantry seating, coffee machine and vending machine');
 item('Printing station');

@@ -13,10 +13,10 @@ const faqs=[
  ['How do I book?','Choose a workspace and time, select one or more available seats, sign in, and confirm your booking.'],
  ['Can I cancel?','You can request cancellation until 48 hours before the booking starts. The admin team will review it.'],
  ['Does the price include GST?','Before you confirm, the summary clearly shows the workspace price and GST separately.'],
- ['Can I book for my team?','Yes. Private cabins, meeting rooms and the conference room can be booked for teams.']
+ ['Can I book for my team?','Yes. Private cabins, the meeting room and the conference room can be booked for teams.']
 ];
 const initialForm={name:'',mobile:'',email:'',company:'',workspaceType:'not_sure',seats:'',preferredDate:'',message:'',consent:false};
-const homeAmenityItems=[[Wifi,'Workspace connectivity'],[Zap,'Power backup'],[Phone,'Two phone booths'],[Coffee,'Free coffee & vending'],[Car,'Ground-floor parking'],[Check,'Daily cleaning']];
+const homeAmenityItems=[[Wifi,'Workspace connectivity'],[Zap,'24/7 power backup'],[Phone,'Two phone booths'],[Coffee,'Free coffee & vending'],[Car,'Ground-floor parking'],[Check,'Daily cleaning']];
 const featuredWorkspaces=items=>{
  const cabin=items.find(item=>item.type==='private_cabin'&&Number(item.capacity)===3)||items.find(item=>item.type==='private_cabin');
  const privateCabin=cabin?{...cabin,name:'Private Cabin',description:'3, 4, 6, 8 and 12-seater options with 24/7 access and 4 complimentary meeting-room hours every month.',bookingWorkspaceId:cabin._id,capacity:3,pricing:{monthly:9999},catalogCabinGroup:true}:null;
@@ -45,7 +45,7 @@ export default function Home(){
 
   <section className="home-faq home-section" id="faqs"><motion.div {...reveal}><p className="eyebrow">Quick answers</p><h2>Know more<br/><em>before you book.</em></h2><Link className="text-link" to="/faq">See all questions <ArrowRight/></Link></motion.div><div className="faq-list">{faqs.map(([question,answer],index)=><details key={question} open={index===0}><summary>{question}<ChevronDown/></summary><p>{answer}</p></details>)}</div></section>
 
-  <section className="home-enquiry" id="enquire"><div className="enquiry-shell"><motion.div className="enquiry-copy" {...reveal}><p className="eyebrow">Plan a free visit</p><h2>Tell us what<br/><em>you need.</em></h2><p>Share your requirements. Our Bengaluru team will help you choose the right space.</p><div><span><MapPin/> Bannerghatta Main Road · Kothnur, Kalena Agrahara</span><span><Clock3/> Visit timing is confirmed during your callback</span></div></motion.div><EnquiryForm form={form} set={set} enquire={enquire} busy={busy} sent={sent}/></div></section>
+  <section className="home-enquiry" id="enquire"><div className="enquiry-shell"><motion.div className="enquiry-copy" {...reveal}><p className="eyebrow">Plan a free visit</p><h2>Tell us what<br/><em>you need.</em></h2><p>Share your requirements. Our Bengaluru team will help you choose the right space.</p><div><span><MapPin/> Bannerghatta Main Road, Gottigere, beside Carmel Academy ICSE School, Kothnur, Kalena Agrahara, Bengaluru, Karnataka 560083</span><span><Clock3/> Visit timing is confirmed during your callback</span></div></motion.div><EnquiryForm form={form} set={set} enquire={enquire} busy={busy} sent={sent}/></div></section>
 
   {showEnquiry&&<div className="modal-backdrop public-enquiry-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setShowEnquiry(false)}}><section className="public-enquiry-modal"><header><div><BrandLogo className="enquiry-brand-logo"/><div><p>Free site visit</p><h2>Find the right workspace.</h2><small>Send your details and our team will call you.</small></div></div><button onClick={()=>setShowEnquiry(false)} aria-label="Close enquiry form"><X/></button></header><EnquiryForm form={form} set={set} enquire={enquire} busy={busy} compact/></section></div>}
  </div>

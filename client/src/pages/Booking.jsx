@@ -704,7 +704,7 @@ export default function Booking() {
           <ul>
             <li>
               <MapPin />
-              {workspace?.zone || "Bannerghatta Main Road, Bengaluru"}
+              {workspace?.zone || "Bannerghatta Main Road, Gottigere, beside Carmel Academy ICSE School, Kothnur, Kalena Agrahara, Bengaluru, Karnataka 560083"}
             </li>
             <li>
               <CalendarDays />
