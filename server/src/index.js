@@ -4,8 +4,9 @@ import { Server } from 'socket.io';
 import { createApp } from './app.js';
 import { config, connectDatabase, validateProductionConfig } from './config.js';
 import { runBookingJobs } from './services.js';
+import { syncMasterData } from './sync-master-data.js';
 
-validateProductionConfig();await connectDatabase();
+validateProductionConfig();await connectDatabase();await syncMasterData();
 const app=createApp(null);
 const server=http.createServer(app);
 const io=new Server(server,{cors:{origin:config.env==='production'?config.clientUrl.split(',').map(value=>value.trim()):true,methods:['GET','POST']}});
