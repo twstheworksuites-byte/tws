@@ -1,7 +1,7 @@
 import{useEffect,useState}from'react';
 import{Link,useLocation}from'react-router-dom';
 import{motion}from'framer-motion';
-import{ArrowRight,Building2,Car,Check,ChevronDown,Clock3,Coffee,MapPin,Phone,ShieldCheck,Wifi,X,Zap}from'lucide-react';
+import{ArrowRight,Building2,Check,ChevronDown,Clock3,Coffee,MapPin,Phone,ShieldCheck,Wifi,X,Zap}from'lucide-react';
 import{api}from'../api';
 import{BrandLogo,Empty,Loading}from'../components/Layout';
 import{WorkspaceCard}from'../components/WorkspaceCard';
@@ -16,7 +16,7 @@ const faqs=[
  ['Can I book for my team?','Yes. Private cabins, the meeting room and the conference room can be booked for teams.']
 ];
 const initialForm={name:'',mobile:'',email:'',company:'',workspaceType:'not_sure',seats:'',preferredDate:'',message:'',consent:false};
-const homeAmenityItems=[[Wifi,'Workspace connectivity'],[Zap,'24/7 power backup'],[Phone,'Two phone booths'],[Coffee,'Free coffee & vending'],[Car,'Ground-floor parking'],[Check,'Daily cleaning']];
+const homeAmenityItems=[[Wifi,'High-speed internet'],[Zap,'24/7 power backup'],[Phone,'Two phone booths'],[Coffee,'Free coffee & vending'],[Check,'Daily cleaning']];
 const featuredWorkspaces=items=>{
  const cabin=items.find(item=>item.type==='private_cabin'&&Number(item.capacity)===3)||items.find(item=>item.type==='private_cabin');
  const privateCabin=cabin?{...cabin,name:'Private Cabin',description:'3, 4, 6, 8 and 12-seater options with 24/7 access and 4 complimentary meeting-room hours every month.',bookingWorkspaceId:cabin._id,capacity:3,pricing:{monthly:9999},catalogCabinGroup:true}:null;
@@ -35,7 +35,7 @@ export default function Home(){
  return <div className="simple-home">
   <section className="simple-hero"><div className="simple-hero-motion" aria-hidden="true"><video autoPlay muted loop playsInline preload="metadata"><source src="/videos/tws-workspace-tour.mp4?v=2" type="video/mp4"/></video><i/><b/></div><div className="simple-hero-shade"/><motion.div className="simple-hero-copy" initial={{opacity:0,y:28}} animate={{opacity:1,y:0}} transition={{duration:.85,ease:[.16,1,.3,1]}}><span className="hero-location"><MapPin/> Bannerghatta Main Road · South Bengaluru</span><h1>{content.title}</h1><p>{content.body}</p><div className="simple-hero-actions"><Link className="btn btn-accent" to="/book">Check available spaces <ArrowRight/></Link><button className="btn btn-glass" onClick={()=>setShowEnquiry(true)}>Request a purchase call</button></div></motion.div><div className="simple-proof"><div className="simple-proof-track">{[0,1].map(group=><div className="simple-proof-set" aria-hidden={group===1} key={group}>{proofItems.map(([Icon,title,copy])=><span key={title}><Icon/><b>{title}</b><small>{copy}</small></span>)}</div>)}</div></div></section>
 
-  <motion.section className="home-intro home-section" {...reveal}><div><p className="eyebrow">The Work Suites</p><h2>Everything you need,<br/><em>without the confusion.</em></h2></div><div><p>Private cabins are available in 3, 4, 6, 8 and 12-seater options. Private cabin members receive 4 complimentary meeting-room hours every month. Every workspace includes two phone booths, connectivity, ground-floor parking and complimentary coffee from the vending machine.</p><Link className="text-link" to="/about">Learn more about TWS <ArrowRight/></Link></div></motion.section>
+  <motion.section className="home-intro home-section" {...reveal}><div><p className="eyebrow">The Work Suites</p><h2>Everything you need,<br/><em>without the confusion.</em></h2></div><div><p>Private cabins are available in 3, 4, 6, 8 and 12-seater options. Private cabin members receive 4 complimentary meeting-room hours every month. Every workspace includes high-speed internet, two phone booths and complimentary coffee from the vending machine.</p><Link className="text-link" to="/about">Learn more about TWS <ArrowRight/></Link></div></motion.section>
 
   <section className="home-spaces home-section" id="spaces"><motion.header className="home-section-head" {...reveal}><div><p className="eyebrow">Choose your space</p><h2>One place. <em>Many ways to work.</em></h2></div><Link className="text-link" to="/workspaces">See spaces & prices <ArrowRight/></Link></motion.header>{loading?<Loading cards={5}/>:homeSpaces.length?<div className="home-space-grid">{homeSpaces.map((item,index)=><WorkspaceCard item={item} index={index} key={item._id}/>)}</div>:<Empty title="Workspaces are being prepared"/>}</section>
 

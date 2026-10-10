@@ -157,7 +157,6 @@ item('Pantry, pantry seating, coffee machine and vending machine');
 item('Printing station');
 item('Male and female washrooms');
 item('Lift access and accessibility facilities');
-item('Ground-floor parking: car and two-wheeler capacity');
 item('Housekeeping and on-site support');
 item('Any other facility customers should know about');
 
@@ -168,7 +167,7 @@ item('Reception and waiting-area photos');
 item('Hot desk and dedicated desk photos');
 item('3, 4 and 6-seater private-cabin photos');
 item('Meeting-room and conference-room photos');
-item('Phone booth, pantry, café, printing area and parking photos');
+item('Phone booth, pantry, café and printing area photos');
 item('One short landscape video for the website banner, if available');
 item('Floor plan or blueprint with room names and seat numbers');
 item('Written confirmation that all supplied media can be used on the website');

@@ -2,7 +2,7 @@ import { Seat, SiteContent, Workspace } from './models.js';
 
 const commonAmenities = [
   'Two complimentary phone booths', 'Reception & seating area', 'Pantry and coffee machine',
-  'Printing station', '24/7 power backup', 'Male and female washrooms', '8-person lift', 'Ground-floor parking'
+  'Printing station', '24/7 power backup', 'High-speed internet', 'Male and female washrooms', '8-person lift'
 ];
 
 export const confirmedInventory = [
