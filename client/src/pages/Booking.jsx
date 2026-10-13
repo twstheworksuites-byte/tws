@@ -213,6 +213,15 @@ export default function Booking() {
       }
     : null;
   const quoteMoney = workspace?.type === "meeting_room" ? moneyExact : money;
+  const meetingOriginalTax = workspace?.type === "meeting_room" && effectiveQuote
+    ? Math.round(effectiveQuote.base * .18 * 100) / 100
+    : 0;
+  const meetingOriginalTotal = workspace?.type === "meeting_room" && effectiveQuote
+    ? Math.round((effectiveQuote.base + meetingOriginalTax) * 100) / 100
+    : 0;
+  const meetingPayableDiscount = workspace?.type === "meeting_room" && effectiveQuote
+    ? Math.round((meetingOriginalTotal - effectiveQuote.total) * 100) / 100
+    : 0;
   const hasRequiredSelection =
     Boolean(workspaceId) &&
     period.startAt.getTime() > Date.now() &&
@@ -731,13 +740,13 @@ export default function Booking() {
           </ul>
           <div className="price-lines">
             <span>
-              {workspace?.type === 'private_cabin' ? `${money(9999)} × ${cabinSize} desks` : workspace?.type === 'meeting_room' ? `Original amount (${hours} hours)` : `Workspace${quantity > 1 ? ` × ${quantity}` : ""}`} {" "}
+              {workspace?.type === 'private_cabin' ? `${money(9999)} × ${cabinSize} desks` : workspace?.type === 'meeting_room' ? `Workspace amount (${hours} hours × ${money(workspace.pricing?.hourly)})` : `Workspace${quantity > 1 ? ` × ${quantity}` : ""}`} {" "}
               <b>{quoteMoney(effectiveQuote?.base)}</b>
             </span>
-            {workspace?.type === 'meeting_room' && effectiveQuote?.discount > 0 && <><span className="meeting-discount">10% meeting-room discount <b>− {moneyExact(effectiveQuote.discount)}</b></span><span>Amount after discount <b>{moneyExact(effectiveQuote.base-effectiveQuote.discount)}</b></span></>}
             <span>
-              GST (18%) <b>{quoteMoney(effectiveQuote?.tax)}</b>
+              GST (18%) <b>{quoteMoney(workspace?.type === 'meeting_room' ? meetingOriginalTax : effectiveQuote?.tax)}</b>
             </span>
+            {workspace?.type === 'meeting_room' && effectiveQuote?.discount > 0 && <><span>Original amount <b>{moneyExact(meetingOriginalTotal)}</b></span><span className="meeting-discount">10% meeting-room discount <b>− {moneyExact(meetingPayableDiscount)}</b></span></>}
             <strong>
               {workspace?.type === 'meeting_room' ? 'Total payable' : 'Total'} <b>{quoteMoney(effectiveQuote?.total)}</b>
             </strong>

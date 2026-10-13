@@ -59,7 +59,12 @@ export default function Checkout() {
   const meetingRoomBooking = booking.workspace?.type === 'meeting_room';
   const quoteMoney = meetingRoomBooking ? moneyExact : money;
   const meetingDiscount = meetingRoomBooking ? Math.round(Number(quote?.base || 0) * .1 * 100) / 100 : 0;
-  const offerDiscount = Math.max(0, Number(quote?.discount || 0) - meetingDiscount);
+  const meetingOriginalTax = meetingRoomBooking ? Math.round(Number(quote?.base || 0) * .18 * 100) / 100 : 0;
+  const meetingOriginalTotal = meetingRoomBooking ? Math.round((Number(quote?.base || 0) + meetingOriginalTax) * 100) / 100 : 0;
+  const meetingPayableDiscount = meetingRoomBooking ? Math.round(meetingOriginalTotal * .1 * 100) / 100 : 0;
+  const offerDiscount = meetingRoomBooking
+    ? Math.max(0, Math.round((meetingOriginalTotal - meetingPayableDiscount - Number(quote?.total || 0)) * 100) / 100)
+    : Math.max(0, Number(quote?.discount || 0) - meetingDiscount);
 
   async function applyCoupon() {
     setCouponBusy(true);
@@ -114,7 +119,7 @@ export default function Checkout() {
       <ul><li><MapPin />{booking.workspace?.zone || 'Bannerghatta Road, Bengaluru'}</li><li><CalendarDays />{booking.date} at {booking.start}</li>{bookingSeats.length > 0 && <li><LockKeyhole />{bookingSeats.length} seat{bookingSeats.length > 1 ? 's' : ''}: {bookingSeats.map(item => item.number).join(', ')}</li>}</ul>
       <div className="coupon-entry"><input disabled={busy || !!pendingBookingId} value={couponCode} onChange={event => { setCouponCode(event.target.value.toUpperCase()); setCoupon(null); }} placeholder="Offer code" /><button type="button" disabled={busy || !!pendingBookingId || couponBusy || couponCode.trim().length < 2} onClick={applyCoupon}>{couponBusy ? 'Checking…' : 'Apply'}</button></div>
       {coupon && <p className="coupon-success"><CheckCircle2 /> {coupon.coupon.code} · {coupon.coupon.name}</p>}
-      <div className="price-lines"><span>{meetingRoomBooking?'Original amount':'Subtotal'} <b>{quoteMoney(quote?.base)}</b></span>{meetingDiscount>0&&<span className="meeting-discount">10% meeting-room discount <b>− {moneyExact(meetingDiscount)}</b></span>}{offerDiscount>0&&<span>Offer-code discount <b>− {quoteMoney(offerDiscount)}</b></span>}{quote?.discount>0&&<span>Amount after discount <b>{quoteMoney(quote.base-quote.discount)}</b></span>}<span>GST (18%) <b>{quoteMoney(quote?.tax)}</b></span><strong>{meetingRoomBooking?'Total payable':'Total'} <b>{quoteMoney(quote?.total)}</b></strong></div>
+      <div className="price-lines"><span>{meetingRoomBooking?'Workspace amount':'Subtotal'} <b>{quoteMoney(quote?.base)}</b></span><span>GST (18%) <b>{quoteMoney(meetingRoomBooking?meetingOriginalTax:quote?.tax)}</b></span>{meetingRoomBooking&&<span>Original amount <b>{moneyExact(meetingOriginalTotal)}</b></span>}{meetingDiscount>0&&<span className="meeting-discount">10% meeting-room discount <b>− {moneyExact(meetingPayableDiscount)}</b></span>}{offerDiscount>0&&<span>Offer-code discount <b>− {quoteMoney(offerDiscount)}</b></span>}<strong>{meetingRoomBooking?'Amount customer will pay':'Total'} <b>{quoteMoney(quote?.total)}</b></strong></div>
       <button form="checkout-form" className="btn btn-accent btn-wide" disabled={busy || couponBusy || seconds <= 0 || !payment}>{seconds <= 0 ? 'Hold expired' : busy ? 'Confirming booking…' : !payment ? 'Checking…' : !payment.enabled ? 'Book now & open WhatsApp' : payment.provider === 'mock' ? 'Confirm test booking' : `Pay ${money(quote?.total)}`} <ArrowRight /></button>
       {pendingBookingId && <button type="button" className="text-button" disabled={busy} onClick={checkPayment}>Check payment status</button>}
       <small className="secure-line"><LockKeyhole />{payment?.provider === 'cashfree' ? 'Payments processed by Cashfree' : 'Online payment is currently disabled'}</small>
