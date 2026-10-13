@@ -777,3 +777,7 @@ section.amenity-grid article>span{transition:color .3s ease,transform .3s ease}
  .public-enquiry-backdrop{inset:0!important;padding:8px!important;align-items:center!important}
  .public-enquiry-modal{width:100%!important;max-height:calc(100dvh - 16px)!important}
 }
+
+/* Make the automatic meeting-room saving clear in booking totals. */
+.price-lines .meeting-discount{color:#24705f;font-weight:700}
+.price-lines .meeting-discount b{color:#24705f}

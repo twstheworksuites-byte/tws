@@ -9,5 +9,6 @@ export async function api(path,options={}){
   return data;
 }
 export const money=value=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(value||0);
+export const moneyExact=value=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:Number(value||0)%1?2:0,maximumFractionDigits:2}).format(value||0);
 export const dt=value=>new Intl.DateTimeFormat('en-IN',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Kolkata'}).format(new Date(value));
 export async function downloadFile(path,filename){const token=localStorage.getItem('tws_token');const response=await fetch(`${API_URL}${path}`,{headers:token?{Authorization:`Bearer ${token}`}:{}});if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(data.message||'Download failed');}const url=URL.createObjectURL(await response.blob()),anchor=document.createElement('a');anchor.href=url;anchor.download=filename;document.body.appendChild(anchor);anchor.click();anchor.remove();URL.revokeObjectURL(url);}

@@ -12,7 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { api, money } from "../api";
+import { api, money, moneyExact } from "../api";
 import { useApp } from "../context";
 import { SeatMap, StatusLegend } from "../components/SeatMap";
 import { Loading } from "../components/Layout";
@@ -208,10 +208,11 @@ export default function Booking() {
     ? {
         base: quote.base * quantity,
         tax: quote.tax * quantity,
-        discount: 0,
+        discount: quote.discount * quantity,
         total: quote.total * quantity,
       }
     : null;
+  const quoteMoney = workspace?.type === "meeting_room" ? moneyExact : money;
   const hasRequiredSelection =
     Boolean(workspaceId) &&
     period.startAt.getTime() > Date.now() &&
@@ -730,14 +731,15 @@ export default function Booking() {
           </ul>
           <div className="price-lines">
             <span>
-              {workspace?.type === 'private_cabin' ? `${money(9999)} × ${cabinSize} desks` : `Workspace${quantity > 1 ? ` × ${quantity}` : ""}`} {" "}
-              <b>{money(effectiveQuote?.base)}</b>
+              {workspace?.type === 'private_cabin' ? `${money(9999)} × ${cabinSize} desks` : workspace?.type === 'meeting_room' ? `Original amount (${hours}h × ${money(workspace.pricing?.hourly)})` : `Workspace${quantity > 1 ? ` × ${quantity}` : ""}`} {" "}
+              <b>{quoteMoney(effectiveQuote?.base)}</b>
             </span>
+            {workspace?.type === 'meeting_room' && effectiveQuote?.discount > 0 && <><span className="meeting-discount">10% meeting-room discount <b>− {moneyExact(effectiveQuote.discount)}</b></span><span>Amount after discount <b>{moneyExact(effectiveQuote.base-effectiveQuote.discount)}</b></span></>}
             <span>
-              GST (18%) <b>{money(effectiveQuote?.tax)}</b>
+              GST (18%) <b>{quoteMoney(effectiveQuote?.tax)}</b>
             </span>
             <strong>
-              Total <b>{money(effectiveQuote?.total)}</b>
+              {workspace?.type === 'meeting_room' ? 'Total payable' : 'Total'} <b>{quoteMoney(effectiveQuote?.total)}</b>
             </strong>
           </div>
           <button

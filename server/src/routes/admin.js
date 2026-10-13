@@ -722,12 +722,14 @@ router.patch(
         quote = {
           base: unitQuote.base * quantity,
           tax: unitQuote.tax * quantity,
+          discount: unitQuote.discount * quantity,
           total: unitQuote.total * quantity,
         };
       booking.startAt = req.validated.startAt;
       booking.endAt = req.validated.endAt;
       booking.amount = quote.base;
       booking.tax = quote.tax;
+      booking.discount = quote.discount;
       booking.total = quote.total;
       booking.rescheduledAt = new Date();
       booking.rescheduledBy = req.user._id;

@@ -8,7 +8,7 @@ import { config } from '../config.js';
 
 const router = Router();
 const periodSchema = z.object({ workspaceId: z.string(), seatId: z.string().optional().nullable(), seatIds: z.array(z.string()).max(64).optional(), requestedCapacity: z.number().int().refine(value => [3, 4, 6, 8, 12].includes(value)).optional(), startAt: z.coerce.date(), endAt: z.coerce.date(), durationType: z.enum(['hourly','daily','weekly','monthly']) }).refine(d => d.endAt > d.startAt, 'End time must be after start time.');
-const couponQuote=(quote,coupon)=>{const discount=Math.min(quote.base,Math.round((coupon.discountType==='percent'?quote.base*coupon.value/100:coupon.value)*100)/100),base=quote.base,tax=Math.round(Math.max(0,base-discount)*config.taxRate*100)/100,total=Math.round((Math.max(0,base-discount)+tax)*100)/100;return{base,discount,tax,total}};
+const couponQuote=(quote,coupon)=>{const base=quote.base,builtInDiscount=Number(quote.discount||0),remaining=Math.max(0,base-builtInDiscount),couponDiscount=Math.min(remaining,Math.round((coupon.discountType==='percent'?remaining*coupon.value/100:coupon.value)*100)/100),discount=Math.round((builtInDiscount+couponDiscount)*100)/100,tax=Math.round(Math.max(0,base-discount)*config.taxRate*100)/100,total=Math.round((Math.max(0,base-discount)+tax)*100)/100;return{base,discount,tax,total}};
 async function activeCoupon(code){const now=new Date(),coupon=await Coupon.findOne({code:String(code||'').trim().toUpperCase(),active:true,$and:[{$or:[{startsAt:null},{startsAt:{$exists:false}},{startsAt:{$lte:now}}]},{$or:[{endsAt:null},{endsAt:{$exists:false}},{endsAt:{$gte:now}}]}]});if(!coupon||(coupon.usageLimit>0&&coupon.usedCount>=coupon.usageLimit))throw Object.assign(new Error('This offer code is invalid, expired, or fully used.'),{status:422});return coupon;}
 
 router.post('/quote', validate(periodSchema), async (req, res, next) => {
@@ -32,7 +32,7 @@ router.post('/holds', authenticate, validate(periodSchema), async (req, res, nex
     if (selectedSeatIds.length) { const seats = await Seat.find({ _id:{$in:selectedSeatIds}, workspace: workspaceId,bookable:true,status:'active' }); if(seats.length!==selectedSeatIds.length)return res.status(409).json({ message: 'One or more selected seats are no longer bookable.' }); }
     const conflict = await Maintenance.exists({ workspace: workspaceId, ...(selectedSeatIds.length ? { $or: [{ seat:{$in:selectedSeatIds} }, { seat: null }] } : {}), status: { $in: ['scheduled','active'] }, startAt: { $lt: endAt }, endAt: { $gt: startAt } });
     if (conflict) return res.status(409).json({ message: 'Maintenance is scheduled during that period.' });
-    const unitQuote=calculateQuote(workspace,durationType,startAt,endAt),quantity=Math.max(1,selectedSeatIds.length),quote={base:unitQuote.base*quantity,tax:unitQuote.tax*quantity,discount:0,total:unitQuote.total*quantity},expiresAt = new Date(Date.now() + 10 * 60_000);
+    const unitQuote=calculateQuote(workspace,durationType,startAt,endAt),quantity=Math.max(1,selectedSeatIds.length),quote={base:unitQuote.base*quantity,tax:unitQuote.tax*quantity,discount:unitQuote.discount*quantity,total:unitQuote.total*quantity},expiresAt = new Date(Date.now() + 10 * 60_000);
     hold = await Hold.create({ owner: req.user._id, workspace: workspaceId, seat: selectedSeatIds[0] || undefined,seats:selectedSeatIds, requestedCapacity, startAt, endAt, durationType, quote, expiresAt });
     const slots = slotsBetween(startAt, endAt),resourceKeys=selectedSeatIds.length?selectedSeatIds.map(id=>resourceKey(workspaceId,id)):[resourceKey(workspaceId)];
     await ResourceLock.insertMany(resourceKeys.flatMap(key=>slots.map(slotStart => ({ resourceKey: key, slotStart, hold: hold._id, expiresAt }))), { ordered: true });
@@ -61,7 +61,7 @@ router.patch('/holds/:id', authenticate, validate(z.object({ seatIds: z.array(z.
     const slots=slotsBetween(hold.startAt,hold.endAt),expiresAt=new Date(Date.now()+10*60_000);
     for(const id of added){const key=resourceKey(hold.workspace,id);addedKeys.push(key);await ResourceLock.insertMany(slots.map(slotStart=>({resourceKey:key,slotStart,hold:hold._id,expiresAt})),{ordered:true});}
     const workspace=await Workspace.findById(hold.workspace),unitQuote=calculateQuote(workspace,hold.durationType,hold.startAt,hold.endAt),quantity=selectedSeatIds.length;
-    hold.seats=selectedSeatIds;hold.seat=selectedSeatIds[0];hold.quote={base:unitQuote.base*quantity,tax:unitQuote.tax*quantity,discount:0,total:unitQuote.total*quantity};hold.expiresAt=expiresAt;await hold.save();
+    hold.seats=selectedSeatIds;hold.seat=selectedSeatIds[0];hold.quote={base:unitQuote.base*quantity,tax:unitQuote.tax*quantity,discount:unitQuote.discount*quantity,total:unitQuote.total*quantity};hold.expiresAt=expiresAt;await hold.save();
     if(removed.length)await ResourceLock.deleteMany({hold:hold._id,resourceKey:{$in:removed.map(id=>resourceKey(hold.workspace,id))}});
     await ResourceLock.updateMany({hold:hold._id},{$set:{expiresAt}});
     req.app.get('io').emit('availability:update',{workspaceId:hold.workspace,seatIds:selectedSeatIds,reason:'hold_updated'});
