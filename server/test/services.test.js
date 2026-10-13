@@ -15,12 +15,12 @@ test('calculates server-side hourly price and tax',()=>{
 test('applies the 10% meeting-room discount for every selected hour count',()=>{
   const workspace={type:'meeting_room',allowedDurations:['hourly'],pricing:{hourly:599}};
   assert.deepEqual(calculateQuote(workspace,'hourly','2026-08-25T10:00:00Z','2026-08-25T12:00:00Z'),{base:1198,tax:194.08,discount:119.8,total:1272.28});
-  assert.deepEqual(calculateQuote(workspace,'hourly','2026-08-25T10:00:00Z','2026-08-25T14:00:00Z'),{base:2156,tax:349.27,discount:215.6,total:2289.67});
-  assert.deepEqual(calculateQuote(workspace,'hourly','2026-08-25T10:00:00Z','2026-08-25T18:00:00Z'),{base:4312,tax:698.54,discount:431.2,total:4579.34});
+  assert.deepEqual(calculateQuote(workspace,'hourly','2026-08-25T10:00:00Z','2026-08-25T14:00:00Z'),{base:2396,tax:388.15,discount:239.6,total:2544.55});
+  assert.deepEqual(calculateQuote(workspace,'hourly','2026-08-25T10:00:00Z','2026-08-25T18:00:00Z'),{base:4792,tax:776.3,discount:479.2,total:5089.1});
 });
 test('updates meeting-room package prices when the admin hourly rate changes',()=>{
   const workspace={type:'meeting_room',allowedDurations:['hourly'],pricing:{hourly:700}};
-  assert.deepEqual(calculateQuote(workspace,'hourly','2026-08-25T10:00:00Z','2026-08-25T14:00:00Z'),{base:2520,tax:408.24,discount:252,total:2676.24});
+  assert.deepEqual(calculateQuote(workspace,'hourly','2026-08-25T10:00:00Z','2026-08-25T14:00:00Z'),{base:2800,tax:453.6,discount:280,total:2973.6});
 });
 test('hashes and verifies passwords without storing plaintext',()=>{const value=hashValue('StrongPassword123');assert.notEqual(value.hash,'StrongPassword123');assert.equal(verifyHash('StrongPassword123',value.salt,value.hash),true);assert.equal(verifyHash('WrongPassword123',value.salt,value.hash),false);});
 test('verifies Cashfree webhook signatures against the untouched raw body',()=>{const previous=process.env.CASHFREE_SECRET_KEY;process.env.CASHFREE_SECRET_KEY='cashfree-test-secret';const body='{"type":"PAYMENT_SUCCESS_WEBHOOK"}',timestamp='1724567890',signature=crypto.createHmac('sha256',process.env.CASHFREE_SECRET_KEY).update(timestamp+body).digest('base64');assert.equal(verifyCashfreeWebhook(body,timestamp,signature),true);assert.equal(verifyCashfreeWebhook(body+' ',timestamp,signature),false);process.env.CASHFREE_SECRET_KEY=previous;});
