@@ -731,7 +731,7 @@ export default function Booking() {
           </ul>
           <div className="price-lines">
             <span>
-              {workspace?.type === 'private_cabin' ? `${money(9999)} × ${cabinSize} desks` : workspace?.type === 'meeting_room' ? `Original amount (${hours}h × ${money(workspace.pricing?.hourly)})` : `Workspace${quantity > 1 ? ` × ${quantity}` : ""}`} {" "}
+              {workspace?.type === 'private_cabin' ? `${money(9999)} × ${cabinSize} desks` : workspace?.type === 'meeting_room' ? `Original amount (${hours} hours)` : `Workspace${quantity > 1 ? ` × ${quantity}` : ""}`} {" "}
               <b>{quoteMoney(effectiveQuote?.base)}</b>
             </span>
             {workspace?.type === 'meeting_room' && effectiveQuote?.discount > 0 && <><span className="meeting-discount">10% meeting-room discount <b>− {moneyExact(effectiveQuote.discount)}</b></span><span>Amount after discount <b>{moneyExact(effectiveQuote.base-effectiveQuote.discount)}</b></span></>}
