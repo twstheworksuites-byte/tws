@@ -28,8 +28,8 @@ export const pricingPlans = [
     name: 'Meeting Room',
     price: 599,
     unit: 'hour',
-    copy: 'One meeting room is available for up to 10 people. GST is added to the selected-hour amount, then the GST-inclusive original total gets 10% off.',
-    features: ['Hourly rate — ₹599', '4 hours — ₹2,396 + GST = ₹2,827.28; 10% off = ₹2,544.55 payable', '8 hours — ₹4,792 + GST = ₹5,654.56; 10% off = ₹5,089.10 payable']
+    copy: 'One meeting room is available for up to 10 people. A 10% discount is applied to the selected-hour amount.',
+    features: ['Original hourly rate — ₹599', '4-hour original amount — ₹2,396; 10% off = ₹2,156.40 before GST', '8-hour original amount — ₹4,792; 10% off = ₹4,312.80 before GST']
   },
   {
     type: 'conference_room',
@@ -64,10 +64,9 @@ export function withLivePricing(plan, workspaces = []) {
   if (plan.type === 'private_cabin') {
     features = [3, 4, 6, 8, 12].map(seats => `${seats} seats — ${format(livePrice)} × ${seats} = ${format(livePrice * seats)} + 18% GST`);
   } else if (plan.type === 'meeting_room') {
-    copy = 'One meeting room is available for up to 10 people. GST is added to the selected-hour amount, then the GST-inclusive original total gets 10% off.';
+    copy = 'One meeting room is available for up to 10 people. A 10% discount is applied to the selected-hour amount.';
     const fourHourOriginal=livePrice*4,eightHourOriginal=livePrice*8;
-    const fourHourWithGst=fourHourOriginal*1.18,eightHourWithGst=eightHourOriginal*1.18;
-    features = [`Hourly rate — ${format(livePrice)}`, `4 hours — ${format(fourHourOriginal)} + GST = ${format(fourHourWithGst)}; 10% off = ${format(fourHourWithGst*.9)} payable`, `8 hours — ${format(eightHourOriginal)} + GST = ${format(eightHourWithGst)}; 10% off = ${format(eightHourWithGst*.9)} payable`];
+    features = [`Original hourly rate — ${format(livePrice)}`, `4-hour original amount — ${format(fourHourOriginal)}; 10% off = ${format(fourHourOriginal*.9)} before GST`, `8-hour original amount — ${format(eightHourOriginal)}; 10% off = ${format(eightHourOriginal*.9)} before GST`];
   } else if (plan.type === 'conference_room') {
     features = [`Standalone hourly booking — ${format(livePrice)}`, 'Approximately 20–25 seats', 'Two phone booths included'];
   }
