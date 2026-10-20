@@ -10,6 +10,17 @@
     { "source": "/get-space", "destination": "/book", "permanent": true },
     { "source": "/lease", "destination": "/book?mode=lease", "permanent": true }
   ],
+  "headers": [
+    { "source": "/book", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
+    { "source": "/checkout", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
+    { "source": "/login", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
+    { "source": "/register", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
+    { "source": "/forgot-password", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
+    { "source": "/reset-password", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
+    { "source": "/booking-confirmation/:path*", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
+    { "source": "/customer/:path*", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
+    { "source": "/admin/:path*", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
