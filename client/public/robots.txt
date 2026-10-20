@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /customer
 
-Sitemap: https://theworksuites.co.in/sitemap.xml
+Sitemap: https://www.theworksuites.co.in/sitemap.xml

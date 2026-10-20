@@ -1,7 +1,7 @@
 import { useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-export const SITE_URL = 'https://theworksuites.co.in';
+export const SITE_URL = 'https://www.theworksuites.co.in';
 const SITE_NAME = 'TWS · The Work Suites';
 const DEFAULT_IMAGE = `${SITE_URL}/images/tws-foyer-01.webp`;
 const LOGO_URL = `${SITE_URL}/images/tws-navbar-logo.svg`;
