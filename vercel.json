@@ -4,6 +4,12 @@
   "installCommand": "npm ci --prefix client",
   "buildCommand": "npm run build --prefix client",
   "outputDirectory": "client/dist",
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/home", "destination": "/", "permanent": true },
+    { "source": "/get-space", "destination": "/book", "permanent": true },
+    { "source": "/lease", "destination": "/book?mode=lease", "permanent": true }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",

@@ -120,7 +120,7 @@ export function Footer() {
   const address =
       "Bannerghatta Main Road, Gottigere, Beside Carmel Academy ICSE School, Kothnur, Kalena Agrahara, Bengaluru, Karnataka 560083",
     hours = import.meta.env.VITE_BUSINESS_HOURS,
-    email = import.meta.env.VITE_BUSINESS_EMAIL,
+    email = import.meta.env.VITE_BUSINESS_EMAIL || "info@theworksuites.co.in",
     phone = import.meta.env.VITE_BUSINESS_PHONE || "+91 77788 86839";
   return (
     <footer id="contact" className="site-footer">

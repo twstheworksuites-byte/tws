@@ -11,6 +11,8 @@ export const config = {
   holdMinutes: Number(process.env.HOLD_MINUTES || 10),
   taxRate: Number(process.env.TAX_RATE || .18),
   bookingPrefix: process.env.BOOKING_PREFIX || 'TWS',
+  businessEmail: process.env.BUSINESS_EMAIL || 'info@theworksuites.co.in',
+  businessPhone: process.env.BUSINESS_PHONE || '+91 77788 86839',
   paymentProvider: process.env.ENABLE_ONLINE_PAYMENTS === 'true' ? (process.env.PAYMENT_PROVIDER || 'disabled') : 'disabled'
 };
 

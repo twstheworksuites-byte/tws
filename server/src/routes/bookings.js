@@ -213,7 +213,7 @@ router.get('/invoices/:id/pdf', authenticate, async (req, res, next) => {
     doc.roundedRect(margin, 690, contentWidth, 62, 10).fill('#eef5f2');
     doc.font('Helvetica-Bold').fontSize(8).fillColor(green).text('THANK YOU FOR CHOOSING TWS', margin + 18, 708, { characterSpacing: .7 });
     doc.font('Helvetica').fontSize(8).fillColor(muted).text('This is a computer-generated invoice. Keep it with your booking confirmation and QR check-in pass.', margin + 18, 725, { width: contentWidth - 36 });
-    const invoiceContact=[process.env.BUSINESS_PHONE,process.env.BUSINESS_EMAIL].filter(Boolean).join(' · ');
+    const invoiceContact=[config.businessPhone,config.businessEmail].filter(Boolean).join(' · ');
     doc.fontSize(7).fillColor('#7f8b87').text(`THE WORK SUITES · Bannerghatta Main Road, Gottigere, Bengaluru 560083${invoiceContact?` · ${invoiceContact}`:''}`, margin, 793, { width: contentWidth, align: 'center', characterSpacing: .35 });
     doc.end();
   } catch (e) { next(e); }

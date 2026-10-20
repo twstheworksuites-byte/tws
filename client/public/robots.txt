@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /customer
+
+Sitemap: https://theworksuites.co.in/sitemap.xml

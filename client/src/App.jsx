@@ -18,6 +18,7 @@ import{About,Amenities,Gallery,SeatingPlans}from'./pages/Discover';
 import BookingConfirmation from'./pages/BookingConfirmation';
 import AdminBusiness from'./pages/AdminBusiness';
 import AdminLeases from'./pages/AdminLeases';
+import Seo from'./components/Seo';
 
 function RequireAuth({admin=false,children}){
  const{user,authReady}=useApp(),location=useLocation();
@@ -32,7 +33,7 @@ function ScrollToTop(){const{pathname,search,hash}=useLocation();useLayoutEffect
 
 export default function App(){
  const location=useLocation(),isPortal=location.pathname.startsWith('/customer')||location.pathname.startsWith('/admin');
- return <><ScrollToTop/><Routes>
+ return <><Seo/><ScrollToTop/><Routes>
   <Route element={<PublicLayout/>}>
    <Route index element={<Home/>}/><Route path="home" element={<Home/>}/><Route path="about" element={<About/>}/><Route path="workspaces" element={<Workspaces/>}/><Route path="seating-plans" element={<SeatingPlans/>}/><Route path="get-space" element={<Navigate to="/book" replace/>}/><Route path="lease" element={<Navigate to="/book?mode=lease" replace/>}/><Route path="amenities" element={<Amenities/>}/><Route path="gallery" element={<Gallery/>}/><Route path="contact" element={<Contact/>}/><Route path="book" element={<Booking/>}/>
    <Route path="checkout" element={<RequireAuth><Checkout/></RequireAuth>}/><Route path="booking-confirmation/:id" element={<RequireAuth><BookingConfirmation/></RequireAuth>}/>

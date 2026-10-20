@@ -2,6 +2,7 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { validate } from '../middleware.js';
+import { config } from '../config.js';
 
 const router = Router();
 const input = z.object({
@@ -9,7 +10,7 @@ const input = z.object({
   history: z.array(z.object({ from: z.enum(['user', 'bot']), text: z.string().max(1000) })).max(8).default([])
 });
 
-const contactLine=()=>process.env.BUSINESS_PHONE?`call ${process.env.BUSINESS_PHONE}`:process.env.BUSINESS_EMAIL?`email ${process.env.BUSINESS_EMAIL}`:'use the website enquiry form or WhatsApp';
+const contactLine=()=>config.businessPhone?`call ${config.businessPhone}`:`email ${config.businessEmail}`;
 const workspaceContext = `You are the concise, friendly booking assistant for TWS · The Work Suites.
 Verified TWS facts: TWS is a professional single-floor workspace at Bannerghatta Main Road, Gottigere, beside Carmel Academy ICSE School, Kothnur, Kalena Agrahara, Bengaluru, Karnataka 560083. It is designed for professionals, teams and growing businesses.
 Workspace options: flexi desks at ₹7,999 per month, dedicated desks at ₹8,999 per month, and private cabins at ₹9,999 per desk per month. Private cabin sizes are 3, 4, 6, 8 and 12 seats. Confirmed inventory includes one 3-seater, thirteen 4-seaters and seven 6-seaters. There is one meeting room for up to 10 people at ₹599 per hour. The original amount is the hourly rate multiplied by the selected hours, then a 10% discount is applied before GST. The conference room holds approximately 20–25 people and costs ₹1,299 per hour. Two phone booths are complimentary for every workspace type.
