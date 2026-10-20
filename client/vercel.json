@@ -6,6 +6,12 @@
   "outputDirectory": "dist",
   "trailingSlash": false,
   "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.theworksuites.co.in" }],
+      "destination": "https://theworksuites.co.in/:path*",
+      "permanent": true
+    },
     { "source": "/home", "destination": "/", "permanent": true },
     { "source": "/get-space", "destination": "/book", "permanent": true },
     { "source": "/lease", "destination": "/book?mode=lease", "permanent": true }

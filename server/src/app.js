@@ -20,8 +20,12 @@ export function createApp(io) {
   const app=express(); app.set('io',io);if(config.env==='production')app.set('trust proxy',1);
   app.use(helmet({crossOriginResourcePolicy:{policy:'cross-origin'}}));
   app.use((req,res,next)=>{req.id=req.get('x-request-id')||crypto.randomUUID();res.setHeader('x-request-id',req.id);next()});
-  const allowedOrigins=config.clientUrl.split(',').map(x=>x.trim());
-  app.use(cors({origin(origin,callback){if(!origin||allowedOrigins.includes(origin)||(config.env!=='production'&&/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)))return callback(null,true);callback(new Error('Origin is not allowed by CORS.'));},credentials:true}));
+  const allowedOrigins=new Set([
+    ...config.clientUrl.split(',').map(x=>x.trim()).filter(Boolean),
+    'https://theworksuites.co.in',
+    'https://www.theworksuites.co.in'
+  ]);
+  app.use(cors({origin(origin,callback){if(!origin||allowedOrigins.has(origin)||(config.env!=='production'&&/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)))return callback(null,true);callback(new Error('Origin is not allowed by CORS.'));},credentials:true}));
   app.use('/uploads',express.static(path.resolve('uploads'),{maxAge:'7d',immutable:true}));
   app.use('/api/payments',express.raw({type:'application/json',limit:'100kb'}),payments);
   app.use(express.json({limit:'6mb'})); app.use(morgan(config.env==='production'?':remote-addr :method :url :status :response-time ms request=:req[x-request-id]':'dev'));app.use('/api',rateLimit({windowMs:15*60_000,limit:500,standardHeaders:true,legacyHeaders:false}));

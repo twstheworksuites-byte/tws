@@ -1,10 +1,14 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
 
+const env = process.env.NODE_ENV || 'development';
+const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+
 export const config = {
-  env: process.env.NODE_ENV || 'development',
+  env,
   port: Number(process.env.PORT || 5000),
-  clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
+  clientUrl,
+  publicClientUrl: process.env.PUBLIC_CLIENT_URL || (env === 'production' ? 'https://theworksuites.co.in' : clientUrl.split(',')[0]),
   mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tws_workspace',
   jwtSecret: process.env.JWT_SECRET || 'development-secret-change-before-production',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
