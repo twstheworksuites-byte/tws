@@ -11,6 +11,7 @@
     { "source": "/lease", "destination": "/book?mode=lease", "permanent": true }
   ],
   "headers": [
+    { "source": "/seo/:path*", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
     { "source": "/book", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
     { "source": "/checkout", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
     { "source": "/login", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
@@ -22,6 +23,15 @@
     { "source": "/admin/:path*", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }
   ],
   "rewrites": [
+    { "source": "/about", "destination": "/seo/about.html" },
+    { "source": "/workspaces", "destination": "/seo/workspaces.html" },
+    { "source": "/seating-plans", "destination": "/seo/seating-plans.html" },
+    { "source": "/amenities", "destination": "/seo/amenities.html" },
+    { "source": "/gallery", "destination": "/seo/gallery.html" },
+    { "source": "/contact", "destination": "/seo/contact.html" },
+    { "source": "/faq", "destination": "/seo/faq.html" },
+    { "source": "/privacy", "destination": "/seo/privacy.html" },
+    { "source": "/terms", "destination": "/seo/terms.html" },
     {
       "source": "/(.*)",
       "destination": "/index.html"
