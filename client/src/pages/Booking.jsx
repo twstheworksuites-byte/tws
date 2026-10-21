@@ -27,6 +27,8 @@ const labels = {
   conference_room: "Conference room",
   phone_booth: "Phone booth",
 };
+const isStaffAssignedDesk = (item) =>
+  ["hot_desk", "dedicated_desk"].includes(item?.type);
 const indiaInputDate = (value) => {
   const parts = Object.fromEntries(
     new Intl.DateTimeFormat("en-CA", {
@@ -194,8 +196,12 @@ export default function Booking() {
       ),
     [availability],
   );
-  const workspaceAvailability =
+  const reportedWorkspaceAvailability =
     availabilityByWorkspace.get(String(workspaceId)) || "available";
+  const workspaceAvailability =
+    isStaffAssignedDesk(workspace) && workspace?.status === "active"
+      ? "available"
+      : reportedWorkspaceAvailability;
   const workspaceSeats = (availability?.seats || []).filter(
     (item) => String(item.workspace) === String(workspaceId),
   );
@@ -517,9 +523,12 @@ export default function Booking() {
                   {spaceOptions.map((item) => {
                     const isCabin = item.type === "private_cabin";
                     const optionWorkspace = isCabin ? privateWorkspaces.find((space) => space.capacity === cabinSourceCapacity(cabinSize)) || item : item;
-                    const state =
+                    const reportedState =
                         availabilityByWorkspace.get(String(optionWorkspace._id)) ||
                         "available",
+                      state = isStaffAssignedDesk(optionWorkspace) && optionWorkspace.status === "active"
+                        ? "available"
+                        : reportedState,
                       capacity = isCabin ? "3, 4, 6, 8 or 12 seats" : item.capacity ? `${item.capacity} seats` : 'Desk count confirmed by TWS',
                       active = isCabin ? workspace?.type === "private_cabin" : workspaceId === item._id;
                     return (
@@ -764,7 +773,9 @@ export default function Booking() {
               ? selectionHold
                 ? "Selected seats stay on hold while this booking page is open."
                 : "Choose a seat to lock it immediately."
-              : "Select first, then sign in as a customer to lock your seats before buying."}
+              : isStaffAssignedDesk(workspace)
+                ? "Sign in to continue. TWS confirms your desk allocation."
+                : "Select first, then sign in as a customer to lock your seats before buying."}
           </p>
         </aside>}
       </div>

@@ -58,6 +58,12 @@ export function slotsBetween(startAt, endAt) {
 }
 
 export function resourceKey(workspaceId, seatId) { return seatId ? `seat:${seatId}` : `workspace:${workspaceId}`; }
+export function isStaffAssignedDesk(workspace) { return ['hot_desk', 'dedicated_desk'].includes(workspace?.type); }
+export function reservationResourceKeys(workspace, workspaceId, seatIds = [], holdId) {
+  if (seatIds.length) return seatIds.map(id => resourceKey(workspaceId, id));
+  if (isStaffAssignedDesk(workspace)) return [`allocation:${workspaceId}:${holdId}`];
+  return [resourceKey(workspaceId)];
+}
 export function calculateQuote(workspace, durationType, startAt, endAt) {
   if (!workspace.allowedDurations.includes(durationType)) throw Object.assign(new Error('That duration is not offered for this workspace.'), { status: 422 });
   const hours = (new Date(endAt) - new Date(startAt)) / 3600000;

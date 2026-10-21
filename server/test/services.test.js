@@ -1,13 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'crypto';
-import { calculateQuote, hashValue, resourceKey, slotsBetween, verifyCashfreeWebhook, verifyHash } from '../src/services.js';
+import { calculateQuote, hashValue, isStaffAssignedDesk, reservationResourceKeys, resourceKey, slotsBetween, verifyCashfreeWebhook, verifyHash } from '../src/services.js';
 
 test('creates deterministic 15-minute conflict slots',()=>{
   const slots=slotsBetween('2026-08-25T10:07:00Z','2026-08-25T11:00:00Z');
   assert.equal(slots.length,4); assert.equal(slots[0].toISOString(),'2026-08-25T10:00:00.000Z');
 });
 test('uses seat as the exclusive resource when present',()=>assert.equal(resourceKey('workspace-1','seat-4'),'seat:seat-4'));
+test('keeps staff-assigned desk reservations independent',()=>{
+  assert.equal(isStaffAssignedDesk({type:'hot_desk'}),true);
+  assert.equal(isStaffAssignedDesk({type:'dedicated_desk'}),true);
+  assert.deepEqual(reservationResourceKeys({type:'hot_desk'},'workspace-1',[],'hold-1'),['allocation:workspace-1:hold-1']);
+  assert.deepEqual(reservationResourceKeys({type:'dedicated_desk'},'workspace-1',[],'hold-2'),['allocation:workspace-1:hold-2']);
+  assert.deepEqual(reservationResourceKeys({type:'meeting_room'},'workspace-1',[],'hold-3'),['workspace:workspace-1']);
+  assert.deepEqual(reservationResourceKeys({type:'private_cabin'},'workspace-1',['seat-4'],'hold-4'),['seat:seat-4']);
+});
 test('calculates server-side hourly price and tax',()=>{
   const workspace={allowedDurations:['hourly'],pricing:{hourly:120}};
   assert.deepEqual(calculateQuote(workspace,'hourly','2026-08-25T10:00:00Z','2026-08-25T12:00:00Z'),{base:240,tax:43.2,discount:0,total:283.2});

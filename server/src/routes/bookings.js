@@ -3,7 +3,7 @@ import { z } from 'zod';
 import PDFDocument from 'pdfkit';
 import { Booking, Coupon, Hold, Invoice, Maintenance, Notification, ResourceLock, Seat, User, Workspace } from '../models.js';
 import { authenticate, authorize, validate } from '../middleware.js';
-import { audit, bookingCheckInToken, bookingReference, calculateQuote, createCustomerNotification, createPaymentOrder, finalizeBookingWithoutPayment, finalizePaidBooking, notifyBooking, qrDataUrl, resourceKey, slotsBetween, verifyHash, verifyPayment } from '../services.js';
+import { audit, bookingCheckInToken, bookingReference, calculateQuote, createCustomerNotification, createPaymentOrder, finalizeBookingWithoutPayment, finalizePaidBooking, notifyBooking, qrDataUrl, reservationResourceKeys, resourceKey, slotsBetween, verifyHash, verifyPayment } from '../services.js';
 import { config } from '../config.js';
 
 const router = Router();
@@ -34,7 +34,7 @@ router.post('/holds', authenticate, validate(periodSchema), async (req, res, nex
     if (conflict) return res.status(409).json({ message: 'Maintenance is scheduled during that period.' });
     const unitQuote=calculateQuote(workspace,durationType,startAt,endAt),quantity=Math.max(1,selectedSeatIds.length),quote={base:unitQuote.base*quantity,tax:unitQuote.tax*quantity,discount:unitQuote.discount*quantity,total:unitQuote.total*quantity},expiresAt = new Date(Date.now() + 10 * 60_000);
     hold = await Hold.create({ owner: req.user._id, workspace: workspaceId, seat: selectedSeatIds[0] || undefined,seats:selectedSeatIds, requestedCapacity, startAt, endAt, durationType, quote, expiresAt });
-    const slots = slotsBetween(startAt, endAt),resourceKeys=selectedSeatIds.length?selectedSeatIds.map(id=>resourceKey(workspaceId,id)):[resourceKey(workspaceId)];
+    const slots = slotsBetween(startAt, endAt),resourceKeys=reservationResourceKeys(workspace,workspaceId,selectedSeatIds,hold._id);
     await ResourceLock.insertMany(resourceKeys.flatMap(key=>slots.map(slotStart => ({ resourceKey: key, slotStart, hold: hold._id, expiresAt }))), { ordered: true });
     req.app.get('io').emit('availability:update', { workspaceId, seatIds:selectedSeatIds, reason: 'hold_created' });
     res.status(201).json({ hold, expiresAt });

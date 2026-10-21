@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { Workspace, Seat, ResourceLock, Maintenance } from '../models.js';
-import { audit, resourceKey, slotsBetween } from '../services.js';
+import { audit, isStaffAssignedDesk, resourceKey, slotsBetween } from '../services.js';
 import { authenticate, authorize, validate } from '../middleware.js';
 
 const router = Router();
@@ -42,7 +42,7 @@ router.get('/availability', async (req, res, next) => {
     const maintenanceKeys = new Set(maintenance.map(m => resourceKey(m.workspace, m.seat)));
     res.json({
       startAt, endAt,
-      workspaces: workspaces.map(w => { const key=resourceKey(w._id); return { ...w, availability: w.status !== 'active' ? (w.status === 'inactive' ? 'blocked' : w.status) : maintenanceKeys.has(key) ? 'maintenance' : lockStates.get(key) || 'available' }; }),
+      workspaces: workspaces.map(w => { const key=resourceKey(w._id); return { ...w, availability: w.status !== 'active' ? (w.status === 'inactive' ? 'blocked' : w.status) : maintenanceKeys.has(key) ? 'maintenance' : isStaffAssignedDesk(w) ? 'available' : lockStates.get(key) || 'available' }; }),
       seats: seats.map(s => { const key=resourceKey(s.workspace,s._id),parent=workspaces.find(w=>String(w._id)===String(s.workspace)),parentKey=resourceKey(s.workspace);return{...s,availability:parent?.status!=='active'?(parent?.status==='inactive'?'blocked':parent?.status):s.status!=='active'?(s.status==='inactive'?'blocked':s.status):maintenanceKeys.has(parentKey)||maintenanceKeys.has(key)?'maintenance':lockStates.get(key)||'available'}; }),
       generatedAt: now
     });
