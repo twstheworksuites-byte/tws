@@ -9,12 +9,10 @@ import {
   Booking,
   Coupon,
   Enquiry,
-  Hold,
   Invoice,
   Lease,
   Maintenance,
   Notification,
-  PaymentEvent,
   ResourceLock,
   Seat,
   SiteContent,
@@ -1652,114 +1650,6 @@ router.patch(
       res.json({ item });
     } catch (e) {
       next(e);
-    }
-  },
-);
-router.delete(
-  "/test-data/customer-records",
-  validate(z.object({ confirm: z.literal("DELETE TEST CUSTOMER DATA") })),
-  async (req, res, next) => {
-    try {
-      const result = await User.db.transaction(async (session) => {
-        const customers = await User.find({ role: "customer" })
-            .select("_id")
-            .session(session)
-            .lean(),
-          customerIds = customers.map((item) => item._id),
-          bookings = await Booking.find({})
-            .select("_id payment.orderId")
-            .session(session)
-            .lean(),
-          bookingIds = bookings.map((item) => item._id),
-          orderIds = bookings
-            .map((item) => item.payment?.orderId)
-            .filter(Boolean),
-          holds = await Hold.find({}).select("_id").session(session).lean(),
-          holdIds = holds.map((item) => item._id),
-          invoices = await Invoice.find({})
-            .select("_id")
-            .session(session)
-            .lean(),
-          enquiries = await Enquiry.find({})
-            .select("_id")
-            .session(session)
-            .lean(),
-          leases = await Lease.find({})
-            .select("_id")
-            .session(session)
-            .lean();
-
-        const resourceLocks = await ResourceLock.deleteMany(
-            {
-              $or: [
-                { booking: { $in: bookingIds } },
-                { hold: { $in: holdIds } },
-              ],
-            },
-            { session },
-          ),
-          notifications = await Notification.deleteMany(
-            {
-              $or: [
-                { booking: { $in: bookingIds } },
-                { recipients: { $in: customerIds } },
-                {
-                  audience: {
-                    $in: ["customers", "all", "selected_customers"],
-                  },
-                },
-              ],
-            },
-            { session },
-          ),
-          paymentEvents = await PaymentEvent.deleteMany(
-            orderIds.length ? { orderId: { $in: orderIds } } : {},
-            { session },
-          ),
-          auditLogs = await AuditLog.deleteMany(
-            {
-              $or: [
-                { actor: { $in: customerIds } },
-                { entityId: { $in: bookingIds } },
-                { entityId: { $in: holdIds } },
-                { entityId: { $in: invoices.map((item) => item._id) } },
-                { entityId: { $in: enquiries.map((item) => item._id) } },
-                { entityId: { $in: leases.map((item) => item._id) } },
-              ],
-            },
-            { session },
-          ),
-          deletedInvoices = await Invoice.deleteMany({}, { session }),
-          deletedBookings = await Booking.deleteMany({}, { session }),
-          deletedHolds = await Hold.deleteMany({}, { session }),
-          deletedLeases = await Lease.deleteMany({}, { session }),
-          deletedEnquiries = await Enquiry.deleteMany({}, { session }),
-          deletedCustomers = await User.deleteMany(
-            { role: "customer" },
-            { session },
-          );
-
-        return {
-          customers: deletedCustomers.deletedCount,
-          bookings: deletedBookings.deletedCount,
-          holds: deletedHolds.deletedCount,
-          invoices: deletedInvoices.deletedCount,
-          resourceLocks: resourceLocks.deletedCount,
-          notifications: notifications.deletedCount,
-          enquiries: deletedEnquiries.deletedCount,
-          leases: deletedLeases.deletedCount,
-          paymentEvents: paymentEvents.deletedCount,
-          auditLogs: auditLogs.deletedCount,
-        };
-      });
-      await audit(req, "test_customer_data.purged", "User", req.user._id, result);
-      req.app.get("io").emit("operations:update", {
-        resource: "customer_data",
-        action: "purged",
-      });
-      res.json({ deleted: result });
-    } catch (error) {
-      next(error);
     }
   },
 );
